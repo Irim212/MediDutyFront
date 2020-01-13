@@ -12,6 +12,9 @@ import {
     Redirect,
     useHistory
   } from "react-router-dom";
+  import { browserHistory } from 'react-dom';
+  import FullCalendar from '@fullcalendar/react';
+  import dayGridPlugin from '@fullcalendar/daygrid';
 
 const auth = {
   isAuthenticated: false,
@@ -30,24 +33,37 @@ const auth = {
 
 const API = 'http://localhost:5000/api';
 
-function App(props) {
-  return (
-    <Router>
-      <div>
-        <Switch>
-          <Route path="/register">
-            <Register />
-          </Route>
-          <PrivateRoute path="/panel">
-            <Panel />
-          </PrivateRoute>
-          <Route path="/">
-            <Login />
-          </Route>
-        </Switch>
-      </div>
-    </Router>
-  );
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    let currentToken = Cookie.get('token');
+    console.log(currentToken);
+
+    if(currentToken !== null) {
+      auth.authenticate(currentToken);
+    }
+  }
+
+  render() {
+
+    return (
+      <Router>
+        <div>
+          <Switch>
+            <Route path="/register">
+              <Register />
+            </Route>
+            <PrivateRoute path="/panel">
+              <Panel />
+            </PrivateRoute>
+            <Route path="/">
+              <Login />
+            </Route>
+          </Switch>
+        </div>
+      </Router>
+    );
+  }
 }
 
 function Login() {
@@ -76,26 +92,31 @@ function Login() {
     })
   }
 
-  return <Form className="login-form" onSubmit={handleSubmit}>
-      <h1 className="text-center"><span className="font-weight-bold"><span style={{color: "#a8323a"}}>Medi</span>App</span></h1>
-      <h2 className="text-center mb-lg-5">Zaloguj się</h2>
-      
-      <FormGroup>
-        <Label>Email</Label>
-        <Input type="email" placeholder="Adres E-mail" value={email} onChange={e => setEmail(e.target.value)}/>
-      </FormGroup>
+  if(auth.isAuthenticated) {
+    return <Redirect to='/panel'/>
+  }
+  else {
+    return <Form className="login-form" onSubmit={handleSubmit}>
+    <h1 className="text-center"><span className="font-weight-bold"><span style={{color: "#a8323a"}}>Medi</span>App</span></h1>
+    <h2 className="text-center mb-lg-5">Zaloguj się</h2>
+    
+    <FormGroup>
+      <Label>Email</Label>
+      <Input type="email" placeholder="Adres E-mail" value={email} onChange={e => setEmail(e.target.value)}/>
+    </FormGroup>
 
-      <FormGroup>
-        <Label>Hasło</Label>
-        <Input type="password" placeholder="Hasło" value={password} onChange={e => setPassword(e.target.value)}/>
-      </FormGroup>
+    <FormGroup>
+      <Label>Hasło</Label>
+      <Input type="password" placeholder="Hasło" value={password} onChange={e => setPassword(e.target.value)}/>
+    </FormGroup>
 
-      <Button className="btn-lg btn-dark btn-block" type="submit" disabled={isLoading}>Zaloguj się</Button>
-      
-      <div className="text-center mt-3">
-        Nie masz konta? Załóż je <a href="/register" className="text-center">tutaj</a>.
-      </div>
-    </Form>
+    <Button className="btn-lg btn-dark btn-block" type="submit" disabled={isLoading}>Zaloguj się</Button>
+    
+    <div className="text-center mt-3">
+      Nie masz konta? Załóż je <a href="/register" className="text-center">tutaj</a>.
+    </div>
+  </Form>
+  }
 }
 
 function Register() {
@@ -179,6 +200,9 @@ function Panel() {
   return <div>
     <h1 className="text-center"><span className="font-weight-bold"><span style={{color: "#a8323a"}}>Medi</span>App</span></h1>
     <h2 className="text-center mb-lg-5">Panel</h2>
+    <div className="calendar-container">
+      <FullCalendar defaultView="dayGridMonth" plugins={[dayGridPlugin]}/>
+    </div>
   </div>
 }
 

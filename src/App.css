@@ -10,6 +10,7 @@
   color: #FF0000;
 }
 
-.center-spinner {
-  text-align: center;
+.calendar-container {
+  margin-left: 100px;
+  margin-right: 100px;
 }
