@@ -14,3 +14,9 @@
   margin-left: 100px;
   margin-right: 100px;
 }
+
+.logout-button {
+  text-align: center;
+  margin: auto;
+  max-width: 150px;
+}
