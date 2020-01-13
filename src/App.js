@@ -19,7 +19,7 @@ import store from './store';
     super(props);
     let currentToken = localStorage.getItem('token');
 
-    if(currentToken !== 'undefined') {
+    if(currentToken !== 'undefined' && currentToken !== 'null') {
       store.auth.authenticate(currentToken);
     }
   }
