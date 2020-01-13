@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Cookie from 'js-cookie'
 import './App.css';
 import { Button, Form, FormGroup, Label, Input }
   from 'reactstrap';
@@ -8,26 +7,30 @@ import {
     BrowserRouter as Router,
     Switch,
     Route,
-    Link,
     Redirect,
     useHistory
   } from "react-router-dom";
-  import { browserHistory } from 'react-dom';
-  import FullCalendar from '@fullcalendar/react';
-  import dayGridPlugin from '@fullcalendar/daygrid';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+
+var jwt_decode = require('jwt-decode');
 
 const auth = {
   isAuthenticated: false,
   token: null,
+  user: null,
   authenticate(token) {
     auth.isAuthenticated = true;
     auth.token = token;
-    Cookie.set('token', token);
+    localStorage.setItem('token', token);
+    auth.user = jwt_decode(token);
+    console.log(auth.user);
   },
   logout() {
     auth.isAuthenticated = false;
     auth.token = null;
-    Cookie.set('token', null);
+    localStorage.setItem('token', null);
+    auth.user = null;
   }
 }
 
@@ -36,7 +39,7 @@ const API = 'http://localhost:5000/api';
 class App extends React.Component {
   constructor(props) {
     super(props);
-    let currentToken = Cookie.get('token');
+    let currentToken = localStorage.getItem('token');
     console.log(currentToken);
 
     if(currentToken !== null) {
