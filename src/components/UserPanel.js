@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import '../App.css';
 import { Button } from 'reactstrap';
+import axios from 'axios';
 
 import store from '../store';
 import { withRouter } from 'react-router-dom';
@@ -11,6 +12,38 @@ class UserPanel extends React.Component {
 
   constructor(props) {
     super(props);
+
+    this.state = {
+      events: [
+
+      ]
+    }
+  }
+
+  componentDidMount = () => {
+    axios.get(store.API + '/Scheduler/userId/' + store.auth.user.primarysid,
+      {
+        'Content-Type': 'application/json'
+      })
+      .then(response => {
+        if (response.status === 200) {
+          this.setState({
+            events: response.data.map(item => {
+              let newItem = {
+                title: item[0].comment,
+                start: item[0].startsAt,
+                end: item[0].endsAt
+              }
+
+              return newItem;
+            })
+          })
+
+          console.log(this.state.events);
+        }
+      }).catch(error => {
+        console.log(error);
+      })
   }
 
   logout = (event) => {
@@ -28,7 +61,7 @@ class UserPanel extends React.Component {
       </div>
 
       <div className="calendar-container">
-        <FullCalendar defaultView="dayGridMonth" plugins={[dayGridPlugin]} />
+        <FullCalendar defaultView="dayGridMonth" plugins={[dayGridPlugin]} events={this.state.events}/>
       </div>
     </div>
   }
