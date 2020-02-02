@@ -23,7 +23,10 @@ class UserPanel extends React.Component {
   componentDidMount = () => {
     axios.get(store.API + '/Scheduler/userId/' + store.auth.user.primarysid,
       {
-        'Content-Type': 'application/json'
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + store.auth.token
+        }
       })
       .then(response => {
         if (response.status === 200) {
@@ -54,7 +57,6 @@ class UserPanel extends React.Component {
 
   render() {
     return <div>
-      <h1 className="text-center"><span className="font-weight-bold"><span style={{ color: "#a8323a" }}>Medi</span>App</span></h1>
       <h2 className="text-center mb-lg-5">Panel</h2>
       <div className="logout-button">
         <Button className="btn-lg btn-dark btn-block" onClick={this.logout}>Wyloguj się</Button>

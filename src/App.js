@@ -1,25 +1,27 @@
 import React from 'react';
 import './App.css';
 import {
-    BrowserRouter as Router,
-    Switch,
-    Route,
-    Redirect,
-  } from "react-router-dom";
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+  Link,
+} from "react-router-dom";
 
 // components
 import LoginPanel from './components/LoginPanel';
 import RegisterPanel from './components/RegisterPanel';
 import UserPanel from './components/UserPanel';
+import AdminPanel from './components/AdminPanel';
 import store from './store';
 
- export default class App extends React.Component {
+export default class App extends React.Component {
 
   constructor(props) {
     super(props);
     let currentToken = localStorage.getItem('token');
 
-    if(currentToken !== 'undefined' && currentToken !== 'null') {
+    if (currentToken !== 'undefined' && currentToken !== 'null') {
       store.auth.authenticate(currentToken);
     }
   }
@@ -29,9 +31,20 @@ import store from './store';
     return (
       <Router>
         <div>
+          <h1 className="text-center logo">
+            <Link to="/" style={{textDecoration: 'none', color: 'black'}}>
+              <span className="font-weight-bold">
+                <span style={{ color: "#a8323a" }}>Medi</span>
+                App
+              </span>
+            </Link>
+          </h1>
           <Switch>
             <Route path="/register">
               <RegisterPanel />
+            </Route>
+            <Route path="/adminPanel">
+              <AdminPanel />
             </Route>
             <PrivateRoute path="/userpanel">
               <UserPanel />
@@ -46,21 +59,27 @@ import store from './store';
   }
 }
 
-function PrivateRoute({ children, ...rest}) {
+function PrivateRoute({ children, ...rest }) {
   return (
     <Route
       {...rest}
       render={({ location }) =>
-      store.auth.isAuthenticated ? (
-          children
+        store.auth.isAuthenticated ? (
+            !store.auth.isAdministrator() ? children : 
+            <Redirect
+              to={{
+                pathname: "/adminPanel",
+                state: { from: location }
+              }}
+            />
         ) : (
-          <Redirect
-            to={{
-              pathname: "/",
-              state: { from: location }
-            }}
-          />
-        )
+            <Redirect
+              to={{
+                pathname: "/",
+                state: { from: location }
+              }}
+            />
+          )
       }
     />
   );
