@@ -41,12 +41,12 @@ export default class App extends React.Component {
             <Route path="/register">
               <RegisterPanel />
             </Route>
-            <Route path="/adminPanel">
+            <PrivateAdminPanelRoute path="/adminPanel">
               <AdminPanel />
-            </Route>
-            <PrivateRoute path="/userpanel">
+            </PrivateAdminPanelRoute>
+            <PrivateUserPanelRoute path="/userpanel">
               <UserPanel />
-            </PrivateRoute>
+            </PrivateUserPanelRoute>
             <Route path="/">
               <LoginPanel />
             </Route>
@@ -57,22 +57,33 @@ export default class App extends React.Component {
   }
 }
 
-function PrivateRoute({ children, ...rest }) {
+function PrivateUserPanelRoute({ children, ...rest }) {
   return (
     <Route
       {...rest}
       render={({ location }) =>
-        store.auth.isAuthenticated ? (
-          !store.auth.isAdministrator() ? (
-            children
-          ) : (
-            <Redirect
-              to={{
-                pathname: "/adminPanel",
-                state: { from: location }
-              }}
-            />
-          )
+        store.auth.isAuthenticated && !store.auth.isAdministrator() ? (
+          children
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/",
+              state: { from: location }
+            }}
+          />
+        )
+      }
+    />
+  );
+}
+
+function PrivateAdminPanelRoute({ children, ...rest }) {
+  return (
+    <Route
+      {...rest}
+      render={({ location }) =>
+        store.auth.isAuthenticated && store.auth.isAdministrator() ? (
+          children
         ) : (
           <Redirect
             to={{
