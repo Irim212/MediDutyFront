@@ -47,17 +47,14 @@ class RegisterPanel extends React.Component {
 
     this.setState({ isLoading: true });
 
+    let searchParams = new URLSearchParams();
+    searchParams.append("email", this.state.email);
+    searchParams.append("password", this.state.password);
+    searchParams.append("firstName", this.state.firstName);
+    searchParams.append("lastName", this.state.lastName);
+
     axios
-      .post(
-        "Register?email=" +
-          this.state.email +
-          "&password=" +
-          this.state.password +
-          "&firstName=" +
-          this.state.firstName +
-          "&lastName=" +
-          this.state.lastName
-      )
+      .post("Register?" + searchParams.toString())
       .then(response => {
         if (response.status === 201) {
           this.setState({

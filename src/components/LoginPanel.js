@@ -22,10 +22,12 @@ class LoginPanel extends React.Component {
     event.preventDefault();
     this.setState({ isLoading: true });
 
+    let searchParams = new URLSearchParams();
+    searchParams.append("email", this.state.email);
+    searchParams.append("password", this.state.password);
+
     axios
-      .post(
-        "Login?email=" + this.state.email + "&password=" + this.state.password
-      )
+      .post("Login?" + searchParams.toString())
       .then(response => {
         if (response.status === 200) {
           store.auth.authenticate(response.data);
