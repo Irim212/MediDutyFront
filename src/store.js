@@ -1,3 +1,5 @@
+import axios from "axios";
+
 var jwt_decode = require("jwt-decode");
 
 export default {
@@ -10,12 +12,14 @@ export default {
       this.token = token;
       localStorage.setItem("token", token);
       this.user = jwt_decode(token);
+      axios.defaults.headers.common["authorization"] = `Bearer ${this.token}`;
     },
     logout() {
       this.isAuthenticated = false;
       this.token = null;
-      localStorage.setItem("token", undefined);
+      localStorage.removeItem("token");
       this.user = undefined;
+      delete axios.defaults.headers.common["authorization"];
     },
     isAdministrator() {
       return (
@@ -31,6 +35,5 @@ export default {
         this.user.role.indexOf("headmaster") >= 0
       );
     }
-  },
-  API: "http://localhost:5000/api"
+  }
 };

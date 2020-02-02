@@ -14,7 +14,6 @@ import {
   ModalFooter
 } from "reactstrap";
 
-import store from "../store";
 import { withRouter } from "react-router-dom";
 
 class RegisterPanel extends React.Component {
@@ -50,22 +49,14 @@ class RegisterPanel extends React.Component {
 
     axios
       .post(
-        store.API +
-          "/Register?email=" +
+        "Register?email=" +
           this.state.email +
           "&password=" +
           this.state.password +
           "&firstName=" +
           this.state.firstName +
           "&lastName=" +
-          this.state.lastName,
-        null,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${store.auth.token}`
-          }
-        }
+          this.state.lastName
       )
       .then(response => {
         if (response.status === 201) {

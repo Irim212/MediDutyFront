@@ -19,12 +19,7 @@ class UserPanel extends React.Component {
 
   componentDidMount = () => {
     axios
-      .get(store.API + "/Scheduler/userId/" + store.auth.user.primarysid, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.auth.token}`
-        }
-      })
+      .get("Scheduler/userId/" + store.auth.user.primarysid)
       .then(response => {
         if (response.status === 200) {
           this.setState({

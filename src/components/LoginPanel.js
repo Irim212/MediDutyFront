@@ -24,14 +24,7 @@ class LoginPanel extends React.Component {
 
     axios
       .post(
-        store.API +
-          "/Login?email=" +
-          this.state.email +
-          "&password=" +
-          this.state.password,
-        {
-          "Content-Type": "application/json"
-        }
+        "Login?email=" + this.state.email + "&password=" + this.state.password
       )
       .then(response => {
         if (response.status === 200) {

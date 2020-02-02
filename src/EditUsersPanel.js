@@ -14,7 +14,6 @@ import {
 } from "reactstrap";
 
 import axios from "axios";
-import store from "./store";
 
 class EditUsers extends React.Component {
   constructor(props) {
@@ -41,12 +40,7 @@ class EditUsers extends React.Component {
 
   componentDidMount() {
     axios
-      .get(store.API + "/Roles", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.auth.token}`
-        }
-      })
+      .get("Roles")
       .then(response => {
         if (response.status === 200) {
           this.setState({
@@ -60,12 +54,7 @@ class EditUsers extends React.Component {
       });
 
     axios
-      .get(store.API + "/Users", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.auth.token}`
-        }
-      })
+      .get("Users")
       .then(response => {
         if (response.status === 200) {
           this.setState({ users: response.data });
@@ -117,12 +106,7 @@ class EditUsers extends React.Component {
     this.setState({ isLoading: true });
 
     axios
-      .delete(store.API + "/Users/" + this.state.tempUser.id, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.auth.token}`
-        }
-      })
+      .delete("Users/" + this.state.tempUser.id)
       .then(response => {
         if (response.status === 200) {
           let users = this.state.users;
@@ -179,12 +163,7 @@ class EditUsers extends React.Component {
     });
 
     axios
-      .put(store.API + "/Users", user, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.auth.token}`
-        }
-      })
+      .put("Users", user)
       .then(response => {
         if (response.status === 200) {
           let users = this.state.users;

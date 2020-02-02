@@ -1,12 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.scss';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from "react";
+import ReactDOM from "react-dom";
+import "./index.scss";
+import App from "./App";
+import * as serviceWorker from "./serviceWorker";
 
-import 'bootstrap/dist/css/bootstrap.css';
+import "bootstrap/dist/css/bootstrap.css";
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import axios from "axios";
+
+axios.defaults.baseURL = "http://localhost:5000/api/";
+axios.defaults.headers.common["content-type"] = "application/json";
+
+ReactDOM.render(<App />, document.getElementById("root"));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
