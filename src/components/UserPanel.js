@@ -33,8 +33,6 @@ class UserPanel extends React.Component {
               return newItem;
             })
           });
-
-          console.log(this.state.events);
         }
       })
       .catch(error => {

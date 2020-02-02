@@ -123,6 +123,7 @@ class EditUsers extends React.Component {
         this.setState({ isLoading: false });
         this.toggleModal();
         this.infoToggleModal();
+        this.resetTempUser();
       })
       .catch(error => {
         console.log(error);
@@ -133,6 +134,7 @@ class EditUsers extends React.Component {
         });
         this.toggleModal();
         this.infoToggleModal();
+        this.resetTempUser();
       });
   };
 
@@ -169,6 +171,7 @@ class EditUsers extends React.Component {
           let users = this.state.users;
           let index = users.indexOf(x => (x.id = user.id));
           users[index] = user;
+          delete users[index]["password"];
 
           this.setState({
             users: users,

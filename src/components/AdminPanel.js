@@ -15,7 +15,7 @@ import {
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import RegisterPanel from "./RegisterPanel";
 import store from "../store";
-import EditUsersPanel from "../EditUsersPanel";
+import EditUsersPanel from "./EditUsersPanel";
 
 class AdminPanel extends React.Component {
   constructor(props) {
