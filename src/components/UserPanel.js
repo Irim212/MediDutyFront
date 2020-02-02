@@ -1,31 +1,28 @@
-import React from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import '../App.css';
-import { Button } from 'reactstrap';
-import axios from 'axios';
+import React from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import "../App.css";
+import { Button } from "reactstrap";
+import axios from "axios";
 
-import store from '../store';
-import { withRouter } from 'react-router-dom';
+import store from "../store";
+import { withRouter } from "react-router-dom";
 
 class UserPanel extends React.Component {
-
   constructor(props) {
     super(props);
 
     this.state = {
-      events: [
-
-      ]
-    }
+      events: []
+    };
   }
 
   componentDidMount = () => {
-    axios.get(store.API + '/Scheduler/userId/' + store.auth.user.primarysid,
-      {
+    axios
+      .get(store.API + "/Scheduler/userId/" + store.auth.user.primarysid, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + store.auth.token
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${store.auth.token}`
         }
       })
       .then(response => {
@@ -36,36 +33,45 @@ class UserPanel extends React.Component {
                 title: item[0].comment,
                 start: item[0].startsAt,
                 end: item[0].endsAt
-              }
+              };
 
               return newItem;
             })
-          })
+          });
 
           console.log(this.state.events);
         }
-      }).catch(error => {
-        console.log(error);
       })
-  }
+      .catch(error => {
+        console.log(error);
+      });
+  };
 
-  logout = (event) => {
+  logout = event => {
     event.preventDefault();
     store.auth.logout();
-    this.props.history.push('/');
-  }
+    this.props.history.push("/");
+  };
 
   render() {
-    return <div>
-      <h2 className="text-center mb-lg-5">Panel</h2>
-      <div className="logout-button">
-        <Button className="btn-lg btn-dark btn-block" onClick={this.logout}>Wyloguj się</Button>
-      </div>
+    return (
+      <div>
+        <h2 className="text-center mb-lg-5">Panel</h2>
+        <div className="logout-button">
+          <Button className="btn-lg btn-dark btn-block" onClick={this.logout}>
+            Wyloguj się
+          </Button>
+        </div>
 
-      <div className="calendar-container">
-        <FullCalendar defaultView="dayGridMonth" plugins={[dayGridPlugin]} events={this.state.events}/>
+        <div className="calendar-container">
+          <FullCalendar
+            defaultView="dayGridMonth"
+            plugins={[dayGridPlugin]}
+            events={this.state.events}
+          />
+        </div>
       </div>
-    </div>
+    );
   }
 }
 
