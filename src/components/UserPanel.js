@@ -23,11 +23,11 @@ class UserPanel extends React.Component {
       .then(response => {
         if (response.status === 200) {
           this.setState({
-            events: response.data.map(item => {
+            events: response.data[0].map(item => {
               let newItem = {
-                title: item[0].comment,
-                start: item[0].startsAt,
-                end: item[0].endsAt
+                title: item.comment,
+                start: item.startsAt,
+                end: item.endsAt
               };
 
               return newItem;
