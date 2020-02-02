@@ -34,21 +34,8 @@ class RegisterPanel extends React.Component {
   }
 
   handleChange = (field, event) => {
-    switch (field) {
-      case "firstName":
-        this.setState({ firstName: event.target.value });
-        break;
-      case "lastName":
-        this.setState({ lastName: event.target.value });
-        break;
-      case "email":
-        this.setState({ email: event.target.value });
-        break;
-      case "password":
-        this.setState({ password: event.target.value });
-        break;
-      default:
-        break;
+    if (["firstName", "lastName", "email", "password"].includes(field)) {
+      this.setState({ [field]: event.target.value });
     }
   };
 

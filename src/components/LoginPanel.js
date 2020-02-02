@@ -47,15 +47,8 @@ class LoginPanel extends React.Component {
   };
 
   handleChange = (field, event) => {
-    switch (field) {
-      case "email":
-        this.setState({ email: event.target.value });
-        break;
-      case "password":
-        this.setState({ password: event.target.value });
-        break;
-      default:
-        break;
+    if (["email", "password"].includes(field)) {
+      this.setState({ [field]: event.target.value });
     }
   };
 

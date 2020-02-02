@@ -51,9 +51,7 @@ class EditUsers extends React.Component {
         if (response.status === 200) {
           this.setState({
             roles: response.data,
-            checkedRoles: response.data.map(function(role, i) {
-              return true;
-            })
+            checkedRoles: response.data.map(() => true)
           });
         }
       })
@@ -81,8 +79,8 @@ class EditUsers extends React.Component {
   elementClicked = element => {
     let user = this.state.users[element];
 
-    let tempChecked = this.state.roles.map(function(role, i) {
-      return user.userRoles.some(function(userRole) {
+    let tempChecked = this.state.roles.map(role => {
+      return user.userRoles.some(userRole => {
         return userRole.roleId === role.id;
       });
     });
@@ -101,31 +99,18 @@ class EditUsers extends React.Component {
   handleChange = (field, event) => {
     let tempUser = this.state.tempUser;
 
-    switch (field) {
-      case "firstName":
-        tempUser.firstName = event.target.value;
-        break;
-      case "lastName":
-        tempUser.lastName = event.target.value;
-        break;
-      case "email":
-        tempUser.email = event.target.value;
-        break;
-      case "password":
-        tempUser.password = event.target.value;
-        break;
-      default:
-        break;
+    if (["firstName", "lastName", "email", "password"].includes(field)) {
+      tempUser[field] = event.target.value;
     }
 
-    this.setState({ tempUser: tempUser });
+    this.setState({ tempUser });
   };
 
   onRoleChange = i => {
-    let tempCheckedRoles = this.state.checkedRoles;
-    tempCheckedRoles[i] = !tempCheckedRoles[i];
+    let checkedRoles = this.state.checkedRoles;
+    checkedRoles[i] = !checkedRoles[i];
 
-    this.setState({ checkedRoles: tempCheckedRoles });
+    this.setState({ checkedRoles });
   };
 
   deleteUser = () => {
@@ -172,7 +157,7 @@ class EditUsers extends React.Component {
     let checkedRoles = this.state.checkedRoles;
     this.setState({ isLoading: true });
 
-    user.userRoles = user.userRoles.filter(function(item, i) {
+    user.userRoles = user.userRoles.filter(item => {
       return checkedRoles[item.roleId - 1];
     });
 
@@ -181,7 +166,7 @@ class EditUsers extends React.Component {
         let userRoles = user.userRoles;
 
         if (
-          !userRoles.some((userRole, userRoleIndex) => {
+          !userRoles.some(userRole => {
             return userRole.roleId === checkedRoleIndex + 1;
           })
         ) {

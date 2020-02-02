@@ -20,7 +20,7 @@ export default class App extends React.Component {
     super(props);
     let currentToken = localStorage.getItem("token");
 
-    if (currentToken !== "undefined" && currentToken !== "null") {
+    if (currentToken !== undefined && currentToken !== null) {
       store.auth.authenticate(currentToken);
     }
   }
