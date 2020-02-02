@@ -9,6 +9,8 @@ import store from "../store";
 import { withRouter } from "react-router-dom";
 
 class UserPanel extends React.Component {
+  _isMounted = false;
+
   constructor(props) {
     super(props);
 
@@ -18,10 +20,12 @@ class UserPanel extends React.Component {
   }
 
   componentDidMount = () => {
+    this._isMounted = true;
+
     axios
       .get("Scheduler/userId/" + store.auth.user.primarysid)
       .then(response => {
-        if (response.status === 200) {
+        if (response.status === 200 && this._isMounted) {
           this.setState({
             events: response.data[0].map(item => {
               let newItem = {
@@ -38,6 +42,10 @@ class UserPanel extends React.Component {
       .catch(error => {
         console.log(error);
       });
+  };
+
+  componentWillUnmount = () => {
+    this._isMounted = false;
   };
 
   logout = event => {
