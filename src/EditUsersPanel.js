@@ -80,7 +80,6 @@ class EditUsers extends React.Component {
 
   elementClicked = element => {
     let user = this.state.users[element];
-    console.log(user);
 
     let tempChecked = this.state.roles.map(function(role, i) {
       return user.userRoles.some(function(userRole) {
@@ -162,6 +161,68 @@ class EditUsers extends React.Component {
           isLoading: false,
           modalInfoDescription:
             "Użytkownik nie został usunięty. Coś poszło nie tak."
+        });
+        this.toggleModal();
+        this.infoToggleModal();
+      });
+  };
+
+  updateUser = () => {
+    let user = this.state.tempUser;
+    let checkedRoles = this.state.checkedRoles;
+    this.setState({ isLoading: true });
+
+    user.userRoles = user.userRoles.filter(function(item, i) {
+      return checkedRoles[item.roleId - 1];
+    });
+
+    checkedRoles.forEach((checkedRole, checkedRoleIndex) => {
+      if (checkedRole) {
+        let userRoles = user.userRoles;
+
+        if (
+          !userRoles.some((userRole, userRoleIndex) => {
+            return userRole.roleId === checkedRoleIndex + 1;
+          })
+        ) {
+          user.userRoles.push({
+            userId: user.id,
+            roleId: checkedRoleIndex + 1
+          });
+        }
+      }
+    });
+
+    axios
+      .put(store.API + "/Users", user, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${store.auth.token}`
+        }
+      })
+      .then(response => {
+        if (response.status === 200) {
+          let users = this.state.users;
+          let index = users.indexOf(x => (x.id = user.id));
+          users[index] = user;
+
+          this.setState({
+            users: users,
+            modalInfoDescription:
+              "Użytkownik " + this.state.tempUser.email + " został zmieniony."
+          });
+        }
+
+        this.setState({ isLoading: false });
+        this.toggleModal();
+        this.infoToggleModal();
+      })
+      .catch(error => {
+        console.log(error);
+        this.setState({
+          isLoading: false,
+          modalInfoDescription:
+            "Użytkownik nie został zmieniony. Coś poszło nie tak."
         });
         this.toggleModal();
         this.infoToggleModal();
@@ -264,6 +325,7 @@ class EditUsers extends React.Component {
               color="primary"
               type="submit"
               disabled={this.state.isLoading}
+              onClick={this.updateUser}
             >
               Zapisz
             </Button>
