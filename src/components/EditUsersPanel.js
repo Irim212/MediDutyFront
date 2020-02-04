@@ -1,5 +1,6 @@
 import { withRouter } from "react-router-dom";
 import React from "react";
+import "./../App.css";
 import {
   Table,
   Modal,
@@ -15,7 +16,7 @@ import {
 
 import axios from "axios";
 
-class EditUsers extends React.Component {
+class EditUsersPanel extends React.Component {
   constructor(props) {
     super(props);
 
@@ -49,9 +50,7 @@ class EditUsers extends React.Component {
           });
         }
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch(err => {});
 
     axios
       .get("Users")
@@ -60,13 +59,13 @@ class EditUsers extends React.Component {
           this.setState({ users: response.data });
         }
       })
-      .catch(error => {
-        console.log(error);
-      });
+      .catch(err => {});
   }
 
   elementClicked = element => {
     let user = this.state.users[element];
+
+    console.log(user);
 
     let tempChecked = this.state.roles.map(role => {
       return user.userRoles.some(userRole => {
@@ -125,8 +124,7 @@ class EditUsers extends React.Component {
         this.infoToggleModal();
         this.resetTempUser();
       })
-      .catch(error => {
-        console.log(error);
+      .catch(() => {
         this.setState({
           isLoading: false,
           modalInfoDescription:
@@ -184,8 +182,7 @@ class EditUsers extends React.Component {
         this.toggleModal();
         this.infoToggleModal();
       })
-      .catch(error => {
-        console.log(error);
+      .catch(() => {
         this.setState({
           isLoading: false,
           modalInfoDescription:
@@ -203,130 +200,139 @@ class EditUsers extends React.Component {
   render() {
     return (
       <div>
-        <Modal
-          isOpen={this.state.infoModalOpened}
-          onClick={this.infoToggleModal}
-        >
-          <ModalHeader toggle={this.infoToggleModal}>
-            Edycja użytkownika
-          </ModalHeader>
-          <ModalBody>{this.state.modalInfoDescription}</ModalBody>
-          <ModalFooter>
-            <Button color="primary" onClick={this.infoToggleModal}>
-              Dalej
-            </Button>
-          </ModalFooter>
-        </Modal>
-        <Modal isOpen={this.state.modalOpened}>
-          <ModalHeader toggle={this.toggleModal}>
-            Edytuj użytkownika
-          </ModalHeader>
-          <ModalBody>
-            <Form className="login-form" onSubmit={this.handleSubmit}>
-              <FormGroup>
-                <Label>Imię</Label>
-                <Input
-                  type="text"
-                  placeholder="Imię"
-                  value={this.state.tempUser.firstName}
-                  onChange={e => this.handleChange("firstName", e)}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label>Nazwisko</Label>
-                <Input
-                  type="text"
-                  placeholder="Nazwisko"
-                  value={this.state.tempUser.lastName}
-                  onChange={e => this.handleChange("lastName", e)}
-                />
-              </FormGroup>
-
-              <FormGroup>
-                <Label>Email</Label>
-                <Input
-                  type="email"
-                  placeholder="Adres E-mail"
-                  value={this.state.tempUser.email}
-                  onChange={e => this.handleChange("email", e)}
-                />
-              </FormGroup>
-              <FormGroup>
-                <Label>Hasło</Label>
-                <Input
-                  type="password"
-                  placeholder="Hasło"
-                  value={this.state.tempUser.password || ""}
-                  onChange={e => this.handleChange("password", e)}
-                />
-              </FormGroup>
-              {this.state.roles.map((role, i) => {
+        {this.infoModal()}
+        {this.registerModal()}
+        <div className="edit-users">
+          <Table size="sm" hover>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {this.state.users.map((user, i) => {
                 return (
-                  <FormGroup check key={i}>
-                    <Label check>
-                      <Input
-                        type="checkbox"
-                        checked={this.state.checkedRoles[i]}
-                        onChange={() => this.onRoleChange(i)}
-                      />
-                      {role.name}
-                    </Label>
-                  </FormGroup>
+                  <tr
+                    key={i}
+                    onClick={() => this.elementClicked(i)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <th scope="row">{i}</th>
+                    <th>{user.firstName}</th>
+                    <th>{user.lastName}</th>
+                    <th>{user.email}</th>
+                  </tr>
                 );
               })}
-            </Form>
-          </ModalBody>
-          <ModalFooter>
-            <Button color="secondary" onClick={this.toggleModal}>
-              Anuluj
-            </Button>
-            <Button
-              color="danger"
-              onClick={this.deleteUser}
-              disabled={this.state.isLoading}
-            >
-              Usuń
-            </Button>
-            <Button
-              color="primary"
-              type="submit"
-              disabled={this.state.isLoading}
-              onClick={this.updateUser}
-            >
-              Zapisz
-            </Button>
-          </ModalFooter>
-        </Modal>
-        <Table size="sm" hover>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.state.users.map((user, i) => {
-              return (
-                <tr
-                  key={i}
-                  onClick={() => this.elementClicked(i)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <th scope="row">{i}</th>
-                  <th>{user.firstName}</th>
-                  <th>{user.lastName}</th>
-                  <th>{user.email}</th>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
+            </tbody>
+          </Table>
+        </div>
       </div>
     );
   }
+
+  infoModal = () => {
+    return (
+      <Modal isOpen={this.state.infoModalOpened} onClick={this.infoToggleModal}>
+        <ModalHeader toggle={this.infoToggleModal}>
+          Edycja użytkownika
+        </ModalHeader>
+        <ModalBody>{this.state.modalInfoDescription}</ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={this.infoToggleModal}>
+            Dalej
+          </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  };
+
+  registerModal = () => {
+    return (
+      <Modal isOpen={this.state.modalOpened}>
+        <ModalHeader toggle={this.toggleModal}>Edytuj użytkownika</ModalHeader>
+        <ModalBody>
+          <Form className="login-form" onSubmit={this.handleSubmit}>
+            <FormGroup>
+              <Label>Imię</Label>
+              <Input
+                type="text"
+                placeholder="Imię"
+                value={this.state.tempUser.firstName}
+                onChange={e => this.handleChange("firstName", e)}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Nazwisko</Label>
+              <Input
+                type="text"
+                placeholder="Nazwisko"
+                value={this.state.tempUser.lastName}
+                onChange={e => this.handleChange("lastName", e)}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>Email</Label>
+              <Input
+                type="email"
+                placeholder="Adres E-mail"
+                value={this.state.tempUser.email}
+                onChange={e => this.handleChange("email", e)}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label>Hasło</Label>
+              <Input
+                type="password"
+                placeholder="Hasło"
+                value={this.state.tempUser.password || ""}
+                onChange={e => this.handleChange("password", e)}
+              />
+            </FormGroup>
+            {this.state.roles.map((role, i) => {
+              return (
+                <FormGroup check key={i}>
+                  <Label check>
+                    <Input
+                      type="checkbox"
+                      checked={this.state.checkedRoles[i]}
+                      onChange={() => this.onRoleChange(i)}
+                    />
+                    {role.name}
+                  </Label>
+                </FormGroup>
+              );
+            })}
+          </Form>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="secondary" onClick={this.toggleModal}>
+            Anuluj
+          </Button>
+          <Button
+            color="danger"
+            onClick={this.deleteUser}
+            disabled={this.state.isLoading}
+          >
+            Usuń
+          </Button>
+          <Button
+            color="primary"
+            type="submit"
+            disabled={this.state.isLoading}
+            onClick={this.updateUser}
+          >
+            Zapisz
+          </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  };
 }
 
-export default withRouter(EditUsers);
+export default withRouter(EditUsersPanel);

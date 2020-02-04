@@ -10,16 +10,31 @@ export default {
     authenticate(token) {
       this.isAuthenticated = true;
       this.token = token;
-      localStorage.setItem("token", token);
       this.user = jwt_decode(token);
+
+      localStorage.setItem("token", token);
+
+      axios.interceptors.response.use(
+        response => response,
+        error => {
+          console.log(error.response);
+          if (error.response.status === 401) {
+            this.logout();
+          }
+          return Promise.reject(error);
+        }
+      );
+
       axios.defaults.headers.common["authorization"] = `Bearer ${this.token}`;
     },
     logout() {
       this.isAuthenticated = false;
       this.token = null;
-      localStorage.removeItem("token");
       this.user = undefined;
+
       delete axios.defaults.headers.common["authorization"];
+
+      localStorage.removeItem("token");
     },
     isAdministrator() {
       return (

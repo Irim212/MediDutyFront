@@ -35,10 +35,7 @@ class LoginPanel extends React.Component {
           this.props.history.push("/");
         }
       })
-      .catch(error => {
-        console.log(error);
-        this.setState({ isLoading: false });
-      });
+      .catch(err => {});
   };
 
   handleChange = (field, event) => {
@@ -49,7 +46,7 @@ class LoginPanel extends React.Component {
 
   render() {
     if (store.auth.isAuthenticated) {
-      return <Redirect to="/userpanel" />;
+      return <Redirect to="/user-panel" />;
     } else {
       return (
         <Form className="login-form" onSubmit={this.handleSubmit}>

@@ -71,7 +71,7 @@ class RegisterPanel extends React.Component {
           this.toggleModal();
         }
       })
-      .catch(error => {
+      .catch(err => {
         this.setState({
           isLoading: false,
           modalHeader: "Konto nie zostało utworzone",

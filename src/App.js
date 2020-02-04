@@ -10,15 +10,18 @@ import {
 
 // components
 import LoginPanel from "./components/LoginPanel";
-import RegisterPanel from "./components/RegisterPanel";
 import UserPanel from "./components/UserPanel";
-import AdminPanel from "./components/AdminPanel";
 import store from "./store";
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     let currentToken = localStorage.getItem("token");
+
+    if (currentToken === "undefined" || currentToken === "null") {
+      localStorage.removeItem("token");
+      return;
+    }
 
     if (currentToken !== undefined && currentToken !== null) {
       store.auth.authenticate(currentToken);
@@ -27,8 +30,8 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <Router>
-        <div>
+      <div>
+        <Router>
           <h1 className="text-center logo">
             <Link to="/" style={{ textDecoration: "none", color: "black" }}>
               <span className="font-weight-bold">
@@ -37,22 +40,18 @@ export default class App extends React.Component {
               </span>
             </Link>
           </h1>
-          <Switch>
-            <Route path="/register">
-              <RegisterPanel />
-            </Route>
-            <PrivateAdminPanelRoute path="/adminPanel">
-              <AdminPanel />
-            </PrivateAdminPanelRoute>
-            <PrivateUserPanelRoute path="/userpanel">
-              <UserPanel />
-            </PrivateUserPanelRoute>
-            <Route path="/">
-              <LoginPanel />
-            </Route>
-          </Switch>
-        </div>
-      </Router>
+          <div>
+            <Switch>
+              <PrivateUserPanelRoute path="/user-panel">
+                <UserPanel />
+              </PrivateUserPanelRoute>
+              <Route path="/">
+                <LoginPanel />
+              </Route>
+            </Switch>
+          </div>
+        </Router>
+      </div>
     );
   }
 }
@@ -62,27 +61,7 @@ function PrivateUserPanelRoute({ children, ...rest }) {
     <Route
       {...rest}
       render={({ location }) =>
-        store.auth.isAuthenticated && !store.auth.isAdministrator() ? (
-          children
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/",
-              state: { from: location }
-            }}
-          />
-        )
-      }
-    />
-  );
-}
-
-function PrivateAdminPanelRoute({ children, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      render={({ location }) =>
-        store.auth.isAuthenticated && store.auth.isAdministrator() ? (
+        store.auth.isAuthenticated ? (
           children
         ) : (
           <Redirect
