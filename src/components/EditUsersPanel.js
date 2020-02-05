@@ -33,11 +33,11 @@ class EditUsersPanel extends React.Component {
         email: "",
         password: "",
         userRoles: [],
-        checkedRoles: [],
-        isLoading: false,
-        infoToggleModal: "",
-        infoModalOpened: false
-      }
+        checkedRoles: []
+      },
+      infoToggleModal: "",
+      infoModalOpened: false,
+      isLoading: false
     };
   }
 
@@ -58,7 +58,7 @@ class EditUsersPanel extends React.Component {
           });
         }
       })
-      .catch(err => {});
+      .catch(() => {});
 
     axios
       .get("Users")
@@ -71,7 +71,7 @@ class EditUsersPanel extends React.Component {
           this.setState({ users: response.data });
         }
       })
-      .catch(err => {});
+      .catch(() => {});
   }
 
   componentWillUnmount() {
@@ -138,7 +138,6 @@ class EditUsersPanel extends React.Component {
         this.setState({ isLoading: false });
         this.toggleModal();
         this.infoToggleModal();
-        this.resetTempUser();
       })
       .catch(() => {
         this.setState({
@@ -148,7 +147,6 @@ class EditUsersPanel extends React.Component {
         });
         this.toggleModal();
         this.infoToggleModal();
-        this.resetTempUser();
       });
   };
 
@@ -183,18 +181,18 @@ class EditUsersPanel extends React.Component {
       .then(response => {
         if (response.status === 200) {
           let users = this.state.users;
-          let index = users.indexOf(x => (x.id = user.id));
+          let index = users.indexOf(x => x.id === user.id);
           users[index] = user;
           delete users[index]["password"];
 
           this.setState({
             users: users,
             modalInfoDescription:
-              "Użytkownik " + this.state.tempUser.email + " został zmieniony."
+              "Użytkownik " + this.state.tempUser.email + " został zmieniony.",
+            isLoading: false
           });
         }
 
-        this.setState({ isLoading: false });
         this.toggleModal();
         this.infoToggleModal();
       })
@@ -271,7 +269,7 @@ class EditUsersPanel extends React.Component {
       <Modal isOpen={this.state.modalOpened}>
         <ModalHeader toggle={this.toggleModal}>Edytuj użytkownika</ModalHeader>
         <ModalBody>
-          <Form className="login-form" onSubmit={this.handleSubmit}>
+          <Form className="form" onSubmit={this.handleSubmit}>
             <FormGroup>
               <Label>Imię</Label>
               <Input

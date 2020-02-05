@@ -33,7 +33,7 @@ class UserCalendarPanel extends React.Component {
           });
         }
       })
-      .catch(err => {});
+      .catch(() => {});
   }
 
   render() {

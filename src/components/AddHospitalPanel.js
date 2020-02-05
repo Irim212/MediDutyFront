@@ -15,27 +15,9 @@ import {
 } from "reactstrap";
 
 import { withRouter } from "react-router-dom";
+import store from "./../store";
 
 class AddHospitalPanel extends React.Component {
-  districts = [
-    "dolnośląskie",
-    "kujawsko-pomorskie",
-    "lubelskie",
-    "lubuskie",
-    "łódzkie",
-    "małopolskie",
-    "mazowieckie",
-    "opolskie",
-    "podkarpackie",
-    "podlaskie",
-    "pomorskie",
-    "śląskie",
-    "świetokrzyskie",
-    "warmińso-mazurskie",
-    "wielkopolskie",
-    "zachodniopomorskie"
-  ];
-
   constructor(props) {
     super(props);
 
@@ -45,7 +27,7 @@ class AddHospitalPanel extends React.Component {
         street: "",
         city: "",
         zip: "",
-        district: ""
+        district: store.districts[0]
       },
       isLoading: false,
       modalOpened: false,
@@ -101,7 +83,7 @@ class AddHospitalPanel extends React.Component {
           this.toggleModal();
         }
       })
-      .catch(err => {
+      .catch(() => {
         this.setState({
           isLoading: false,
           modalHeader: "Szpital nie został dodany",
@@ -126,7 +108,7 @@ class AddHospitalPanel extends React.Component {
             </Button>
           </ModalFooter>
         </Modal>
-        <Form className="login-form" onSubmit={this.handleSubmit}>
+        <Form className="form" onSubmit={this.handleSubmit}>
           <h2 className="text-center mb-lg-5">Dodaj szpital</h2>
 
           <FormGroup>
@@ -177,7 +159,7 @@ class AddHospitalPanel extends React.Component {
               value={this.state.hospital.district}
               onChange={e => this.handleChange("district", e)}
             >
-              {this.districts.map((item, i) => {
+              {store.districts.map((item, i) => {
                 return <option key={i}>{item}</option>;
               })}
             </Input>

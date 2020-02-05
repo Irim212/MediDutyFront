@@ -50,5 +50,30 @@ export default {
         this.user.role.indexOf("headmaster") >= 0
       );
     }
-  }
+  },
+  wards: [
+    "Oddział Anestezjologii",
+    "Oddział Chirurgii",
+    "Oddział Chorób Płuc i Chemioterapii",
+    "Oddział Kardiologiczny",
+    "Oddział Neurologiczny"
+  ],
+  districts: [
+    "dolnośląskie",
+    "kujawsko-pomorskie",
+    "lubelskie",
+    "lubuskie",
+    "łódzkie",
+    "małopolskie",
+    "mazowieckie",
+    "opolskie",
+    "podkarpackie",
+    "podlaskie",
+    "pomorskie",
+    "śląskie",
+    "świetokrzyskie",
+    "warmińso-mazurskie",
+    "wielkopolskie",
+    "zachodniopomorskie"
+  ]
 };

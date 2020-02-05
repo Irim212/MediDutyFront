@@ -8,6 +8,7 @@ import UserCalendar from "./UserCalendarPanel";
 import EditUserPanel from "./EditUsersPanel";
 import AdduserPanel from "./AddUserPanel";
 import AddHospitalPanel from "./AddHospitalPanel";
+import EditHospitalsPanel from "./EditHospitalsPanel";
 
 class UserPanel extends React.Component {
   logout = event => {
@@ -33,6 +34,9 @@ class UserPanel extends React.Component {
             </Route>
             <Route path="/user-panel/add-hospital">
               <AddHospitalPanel />
+            </Route>
+            <Route path="/user-panel/edit-hospitals">
+              <EditHospitalsPanel />
             </Route>
           </Switch>
         </div>

@@ -71,7 +71,7 @@ class AdduserPanel extends React.Component {
           this.toggleModal();
         }
       })
-      .catch(err => {
+      .catch(() => {
         this.setState({
           isLoading: false,
           modalHeader: "Konto nie zostało utworzone",
@@ -96,7 +96,7 @@ class AdduserPanel extends React.Component {
             </Button>
           </ModalFooter>
         </Modal>
-        <Form className="login-form" onSubmit={this.handleSubmit}>
+        <Form className="form" onSubmit={this.handleSubmit}>
           <h2 className="text-center mb-lg-5">Dodaj użytkownika</h2>
 
           <FormGroup>

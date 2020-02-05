@@ -39,7 +39,12 @@ class UserPanelNavBar extends React.Component {
         content: "Dodaj szpital"
       });
 
-      this.props.history.push("/user-panel/edit-users");
+      links.push({
+        path: "/user-panel/edit-hospitals",
+        content: "Edytuj szpitale"
+      });
+
+      this.props.history.push("/user-panel/add-user");
     }
 
     links.push({
