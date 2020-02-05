@@ -1,5 +1,5 @@
 import React from "react";
-import { Navbar, Nav, NavItem, NavLink } from "reactstrap";
+import { Navbar, Nav, NavItem } from "reactstrap";
 
 import store from "./../store";
 import { withRouter, NavLink as NavigationLink } from "react-router-dom";
@@ -17,8 +17,7 @@ class UserPanelNavBar extends React.Component {
     if (!store.auth.isAdministrator()) {
       links.push({
         path: "/user-panel/calendar",
-        content: "Dyżury",
-        active: true
+        content: "Dyżury"
       });
 
       this.props.history.push("/user-panel/calendar");
@@ -26,15 +25,18 @@ class UserPanelNavBar extends React.Component {
 
     if (store.auth.isAdministrator()) {
       links.push({
-        path: "/user-panel/edit-users",
-        content: "Edytuj użytkowników",
-        active: true
+        path: "/user-panel/add-user",
+        content: "Dodaj użytkownika"
       });
 
       links.push({
-        path: "/user-panel/add-user",
-        content: "Dodaj użytkownika",
-        active: false
+        path: "/user-panel/edit-users",
+        content: "Edytuj użytkowników"
+      });
+
+      links.push({
+        path: "/user-panel/add-hospital",
+        content: "Dodaj szpital"
       });
 
       this.props.history.push("/user-panel/edit-users");

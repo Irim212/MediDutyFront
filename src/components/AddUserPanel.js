@@ -16,7 +16,7 @@ import {
 
 import { withRouter } from "react-router-dom";
 
-class RegisterPanel extends React.Component {
+class AdduserPanel extends React.Component {
   constructor(props) {
     super(props);
 
@@ -97,7 +97,7 @@ class RegisterPanel extends React.Component {
           </ModalFooter>
         </Modal>
         <Form className="login-form" onSubmit={this.handleSubmit}>
-          <h2 className="text-center mb-lg-5">Załóż konto</h2>
+          <h2 className="text-center mb-lg-5">Dodaj użytkownika</h2>
 
           <FormGroup>
             <Label>Imię</Label>
@@ -144,7 +144,7 @@ class RegisterPanel extends React.Component {
             type="submit"
             disabled={this.state.isLoading}
           >
-            Załóż konto
+            Dodaj
           </Button>
         </Form>
       </div>
@@ -152,4 +152,4 @@ class RegisterPanel extends React.Component {
   }
 }
 
-export default withRouter(RegisterPanel);
+export default withRouter(AdduserPanel);

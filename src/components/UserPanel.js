@@ -6,7 +6,8 @@ import { withRouter, Switch, Route } from "react-router-dom";
 import UserPanelNavBar from "./UserPanelNavBar";
 import UserCalendar from "./UserCalendarPanel";
 import EditUserPanel from "./EditUsersPanel";
-import RegisterPanel from "./RegisterPanel";
+import AdduserPanel from "./AddUserPanel";
+import AddHospitalPanel from "./AddHospitalPanel";
 
 class UserPanel extends React.Component {
   logout = event => {
@@ -25,10 +26,13 @@ class UserPanel extends React.Component {
               <UserCalendar />
             </Route>
             <Route path="/user-panel/add-user">
-              <RegisterPanel />
+              <AdduserPanel />
             </Route>
             <Route path="/user-panel/edit-users">
               <EditUserPanel />
+            </Route>
+            <Route path="/user-panel/add-hospital">
+              <AddHospitalPanel />
             </Route>
           </Switch>
         </div>

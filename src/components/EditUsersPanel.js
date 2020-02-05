@@ -70,8 +70,6 @@ class EditUsersPanel extends React.Component {
         if (response.status === 200) {
           this.setState({ users: response.data });
         }
-
-        console.log(response.data);
       })
       .catch(err => {});
   }
