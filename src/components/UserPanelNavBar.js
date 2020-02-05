@@ -2,7 +2,7 @@ import React from "react";
 import { Navbar, Nav, NavItem, NavLink } from "reactstrap";
 
 import store from "./../store";
-import { withRouter } from "react-router-dom";
+import { withRouter, NavLink as NavigationLink } from "react-router-dom";
 
 class UserPanelNavBar extends React.Component {
   constructor(props) {
@@ -16,12 +16,12 @@ class UserPanelNavBar extends React.Component {
 
     if (!store.auth.isAdministrator()) {
       links.push({
-        path: "/user-panel/events",
+        path: "/user-panel/calendar",
         content: "Dyżury",
         active: true
       });
 
-      links.push(this.props.history.push("/user-panel/calendar"));
+      this.props.history.push("/user-panel/calendar");
     }
 
     if (store.auth.isAdministrator()) {
@@ -29,6 +29,12 @@ class UserPanelNavBar extends React.Component {
         path: "/user-panel/edit-users",
         content: "Edytuj użytkowników",
         active: true
+      });
+
+      links.push({
+        path: "/user-panel/add-user",
+        content: "Dodaj użytkownika",
+        active: false
       });
 
       this.props.history.push("/user-panel/edit-users");
@@ -42,7 +48,8 @@ class UserPanelNavBar extends React.Component {
     this.setState({ links });
   }
 
-  logout = () => {
+  logout = event => {
+    event.preventDefault();
     store.auth.logout();
     this.props.history.push("/");
   };
@@ -56,20 +63,26 @@ class UserPanelNavBar extends React.Component {
               if (link.path !== undefined) {
                 return (
                   <NavItem key={i}>
-                    <NavLink href={link.path} active={link.active}>
+                    <NavigationLink
+                      to={link.path}
+                      activeClassName="active-nav"
+                      className="nav-item"
+                    >
                       {link.content}
-                    </NavLink>
+                    </NavigationLink>
                   </NavItem>
                 );
               } else {
                 return (
                   <NavItem key={i}>
-                    <NavLink
+                    <NavigationLink
+                      to=""
                       onClick={link.callback}
                       style={{ cursor: "pointer" }}
+                      className="nav-item"
                     >
                       {link.content}
-                    </NavLink>
+                    </NavigationLink>
                   </NavItem>
                 );
               }

@@ -17,6 +17,8 @@ import {
 import axios from "axios";
 
 class EditUsersPanel extends React.Component {
+  _isMounted = false;
+
   constructor(props) {
     super(props);
 
@@ -40,10 +42,16 @@ class EditUsersPanel extends React.Component {
   }
 
   componentDidMount() {
+    this._isMounted = true;
+
     axios
       .get("Roles")
       .then(response => {
         if (response.status === 200) {
+          if (!this._isMounted) {
+            return;
+          }
+
           this.setState({
             roles: response.data,
             checkedRoles: response.data.map(() => true)
@@ -55,23 +63,33 @@ class EditUsersPanel extends React.Component {
     axios
       .get("Users")
       .then(response => {
+        if (!this._isMounted) {
+          return;
+        }
+
         if (response.status === 200) {
           this.setState({ users: response.data });
         }
+
+        console.log(response.data);
       })
       .catch(err => {});
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
   elementClicked = element => {
     let user = this.state.users[element];
-
-    console.log(user);
 
     let tempChecked = this.state.roles.map(role => {
       return user.userRoles.some(userRole => {
         return userRole.roleId === role.id;
       });
     });
+
+    user.password = "";
 
     this.setState({
       tempUser: user,

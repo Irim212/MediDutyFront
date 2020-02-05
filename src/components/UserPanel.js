@@ -6,6 +6,7 @@ import { withRouter, Switch, Route } from "react-router-dom";
 import UserPanelNavBar from "./UserPanelNavBar";
 import UserCalendar from "./UserCalendarPanel";
 import EditUserPanel from "./EditUsersPanel";
+import RegisterPanel from "./RegisterPanel";
 
 class UserPanel extends React.Component {
   logout = event => {
@@ -22,6 +23,9 @@ class UserPanel extends React.Component {
           <Switch>
             <Route path="/user-panel/calendar">
               <UserCalendar />
+            </Route>
+            <Route path="/user-panel/add-user">
+              <RegisterPanel />
             </Route>
             <Route path="/user-panel/edit-users">
               <EditUserPanel />

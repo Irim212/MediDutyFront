@@ -40,3 +40,12 @@
   height: 100%;
   padding-top: 30px;
 }
+
+.active-nav {
+  font-weight: bold;
+}
+
+.nav-item {
+  color: #0066ff;
+  margin: 5px;
+}
