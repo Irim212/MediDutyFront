@@ -35,10 +35,10 @@ class EditHospitalsPanel extends React.Component {
         city: "",
         zip: "",
         district: store.districts[0],
-        wards: [],
-        ward: store.wards[0],
-        readonlyWards: []
+        wards: []
       },
+      ward: store.wards[0],
+      readonlyWards: [],
       infoToggleModal: "",
       infoModalOpened: false,
       isLoading: false
@@ -72,10 +72,9 @@ class EditHospitalsPanel extends React.Component {
       .then(response => {
         let tempHospital = this.state.hospitals[element];
         tempHospital.wards = response.data[0];
-        tempHospital.readonlyWards = response.data[0];
 
         this.updateCurrentWard(tempHospital);
-        this.setState({ tempHospital });
+        this.setState({ tempHospital, readonlyWards: response.data[0] });
         this.toggleModal();
       })
       .catch(err => {});
@@ -107,24 +106,28 @@ class EditHospitalsPanel extends React.Component {
           let index = hospitals.indexOf(x => x.id === hospital.id);
           hospitals[index] = hospital;
 
+          console.log(this.state.readonlyWards);
+          console.log(this.state.tempHospital.wards);
+
           this.state.tempHospital.wards
             .filter(
               newWard =>
-                !this.state.tempHospital.readonlyWards.some(
-                  readonlyWard => readonlyWard.type === newWard
+                !this.state.readonlyWards.some(
+                  readonlyWard => readonlyWard.type === newWard.type
                 )
             )
             .forEach(newWard => {
+              console.log(newWard);
               axios
                 .post("Wards", newWard)
-                .then(response => {})
-                .catch(err => {});
+                .then(response => console.log)
+                .catch(err => console.log);
             });
 
           this.setState({
             hospitals,
             modalInfoDescription:
-              "Szpital " + this.state.tempUser.name + " został zmieniony.",
+              "Szpital " + this.state.tempHospital.name + " został zmieniony.",
             isLoading: false
           });
         }
