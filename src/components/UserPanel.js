@@ -6,7 +6,7 @@ import { withRouter, Switch, Route } from "react-router-dom";
 import UserPanelNavBar from "./UserPanelNavBar";
 import UserCalendar from "./UserCalendarPanel";
 import EditUserPanel from "./EditUsersPanel";
-import AdduserPanel from "./AddUserPanel";
+import AddUserPanel from "./AddUserPanel";
 import AddHospitalPanel from "./AddHospitalPanel";
 import EditHospitalsPanel from "./EditHospitalsPanel";
 
@@ -27,7 +27,7 @@ class UserPanel extends React.Component {
               <UserCalendar />
             </Route>
             <Route path="/user-panel/add-user">
-              <AdduserPanel />
+              <AddUserPanel />
             </Route>
             <Route path="/user-panel/edit-users">
               <EditUserPanel />

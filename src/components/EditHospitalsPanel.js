@@ -386,7 +386,7 @@ class EditHospitalsPanel extends React.Component {
                 !this.state.tempHospital.wards.some(
                   hospitalWard => hospitalWard.type === i
                 )
-            ).length ? (
+            ).length && (
               <Row form>
                 <Label>Dodaj oddział</Label>
                 <Col md={9}>
@@ -416,8 +416,6 @@ class EditHospitalsPanel extends React.Component {
                   </Button>
                 </Col>
               </Row>
-            ) : (
-              <Label>Nie ma więcej oddziałów</Label>
             )}
           </Form>
         </ModalBody>

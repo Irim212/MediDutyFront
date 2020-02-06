@@ -15,8 +15,11 @@ import {
 } from "reactstrap";
 
 import { withRouter } from "react-router-dom";
+import store from "../store";
 
-class AdduserPanel extends React.Component {
+class AddUserPanel extends React.Component {
+  _isMounted = false;
+
   constructor(props) {
     super(props);
 
@@ -28,13 +31,63 @@ class AdduserPanel extends React.Component {
       isLoading: false,
       modalOpened: false,
       modalHeader: "",
-      modalDescription: ""
+      modalDescription: "",
+      hospitals: [],
+      hospital: "",
+      wards: [],
+      ward: null
     };
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+
+    axios
+      .get("Hospitals")
+      .then(response => {
+        if (!this._isMounted) {
+          return;
+        }
+
+        if (response.status === 200) {
+          this.setState({
+            hospitals: response.data,
+            hospital: response.data[0]
+          });
+
+          this.updateWardsForCurrentHospital(response.data[0]);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
   }
 
   handleChange = (field, event) => {
     if (["firstName", "lastName", "email", "password"].includes(field)) {
       this.setState({ [field]: event.target.value });
+
+      return;
+    }
+
+    if (field === "hospital") {
+      let hospital = this.state.hospitals.find(
+        x => x.name === event.target.value
+      );
+      this.setState({ hospital });
+      this.updateWardsForCurrentHospital(hospital);
+    }
+
+    if (field === "ward") {
+      let ward = { ...this.state.ward };
+      ward.type = store.wards.findIndex(x => x === event.target.value);
+      ward.id = this.state.wards.find(x => x.type === ward.type).id;
+
+      this.setState({ ward });
     }
   };
 
@@ -47,15 +100,21 @@ class AdduserPanel extends React.Component {
 
     this.setState({ isLoading: true });
 
-    let searchParams = new URLSearchParams();
-    searchParams.append("email", this.state.email);
-    searchParams.append("password", this.state.password);
-    searchParams.append("firstName", this.state.firstName);
-    searchParams.append("lastName", this.state.lastName);
+    let user = {
+      email: this.state.email,
+      password: this.state.password,
+      firstName: this.state.firstName,
+      lastName: this.state.lastName,
+      wardId: this.state.ward.id
+    };
 
     axios
-      .post("Register?" + searchParams.toString())
+      .post("Register", user)
       .then(response => {
+        if (!this._isMounted) {
+          return;
+        }
+
         if (response.status === 201) {
           this.setState({
             isLoading: false,
@@ -71,7 +130,7 @@ class AdduserPanel extends React.Component {
           this.toggleModal();
         }
       })
-      .catch(() => {
+      .catch(err => {
         this.setState({
           isLoading: false,
           modalHeader: "Konto nie zostało utworzone",
@@ -79,6 +138,32 @@ class AdduserPanel extends React.Component {
         });
 
         this.toggleModal();
+        console.log(err);
+      });
+  };
+
+  updateWardsForCurrentHospital = hospital => {
+    this.setState({ isLoading: true });
+
+    axios
+      .get("Wards/" + hospital.id)
+      .then(response => {
+        if (!this._isMounted) {
+          return;
+        }
+
+        if (response.status === 200) {
+          this.setState({
+            wards: response.data[0],
+            ward: response.data[0][0]
+          });
+        }
+
+        this.setState({ isLoading: false });
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({ isLoading: false });
       });
   };
 
@@ -139,6 +224,37 @@ class AdduserPanel extends React.Component {
             />
           </FormGroup>
 
+          <FormGroup>
+            <Label>Szpital</Label>
+            <Input
+              type="select"
+              name="select"
+              value={this.state.hospital.name}
+              onChange={e => this.handleChange("hospital", e)}
+            >
+              {this.state.hospitals.map((item, i) => {
+                return <option key={i}>{item.name}</option>;
+              })}
+            </Input>
+          </FormGroup>
+
+          {this.state.ward !== null && (
+            <FormGroup>
+              <Label>Oddział</Label>
+              <Input
+                disabled={this.state.isLoading}
+                type="select"
+                name="select"
+                value={store.wards[this.state.ward.type]}
+                onChange={e => this.handleChange("ward", e)}
+              >
+                {this.state.wards.map((item, i) => {
+                  return <option key={i}>{store.wards[item.type]}</option>;
+                })}
+              </Input>
+            </FormGroup>
+          )}
+
           <Button
             className="btn-lg btn-dark btn-block"
             type="submit"
@@ -152,4 +268,4 @@ class AdduserPanel extends React.Component {
   }
 }
 
-export default withRouter(AdduserPanel);
+export default withRouter(AddUserPanel);
