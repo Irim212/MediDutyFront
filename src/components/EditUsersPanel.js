@@ -79,7 +79,7 @@ class EditUsersPanel extends React.Component {
   }
 
   elementClicked = element => {
-    let user = this.state.users[element];
+    let user = { ...this.state.users[element] };
 
     let tempChecked = this.state.roles.map(role => {
       return user.userRoles.some(userRole => {

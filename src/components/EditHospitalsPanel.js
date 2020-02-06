@@ -70,11 +70,16 @@ class EditHospitalsPanel extends React.Component {
     axios
       .get("Wards/" + this.state.hospitals[element].id)
       .then(response => {
-        let tempHospital = this.state.hospitals[element];
-        tempHospital.wards = response.data[0];
+        let hospital = { ...this.state.hospitals[element] };
+        hospital.wards = response.data[0];
+        let readonlyWards = Array.from(response.data[0]);
 
-        this.updateCurrentWard(tempHospital);
-        this.setState({ tempHospital, readonlyWards: response.data[0] });
+        this.updateCurrentWard(hospital);
+
+        this.setState({
+          tempHospital: hospital,
+          readonlyWards
+        });
         this.toggleModal();
       })
       .catch(err => {});
@@ -85,7 +90,7 @@ class EditHospitalsPanel extends React.Component {
   };
 
   handleChange = (field, event) => {
-    let tempHospital = this.state.tempHospital;
+    let tempHospital = { ...this.state.tempHospital };
 
     if (["name", "street", "city", "zip", "district", "ward"].includes(field)) {
       tempHospital[field] = event.target.value;
@@ -95,7 +100,7 @@ class EditHospitalsPanel extends React.Component {
   };
 
   updateHospital = () => {
-    let hospital = this.state.tempHospital;
+    let hospital = { ...this.state.tempHospital };
     this.setState({ isLoading: true });
 
     axios
@@ -103,11 +108,10 @@ class EditHospitalsPanel extends React.Component {
       .then(response => {
         if (response.status === 200) {
           let hospitals = this.state.hospitals;
-          let index = hospitals.indexOf(x => x.id === hospital.id);
+          let index = hospitals.findIndex(x => {
+            return x.id === hospital.id;
+          });
           hospitals[index] = hospital;
-
-          console.log(this.state.readonlyWards);
-          console.log(this.state.tempHospital.wards);
 
           this.state.tempHospital.wards
             .filter(
@@ -117,7 +121,6 @@ class EditHospitalsPanel extends React.Component {
                 )
             )
             .forEach(newWard => {
-              console.log(newWard);
               axios
                 .post("Wards", newWard)
                 .then(response => console.log)
@@ -154,7 +157,7 @@ class EditHospitalsPanel extends React.Component {
       .delete("Hospitals/" + this.state.tempHospital.id)
       .then(response => {
         if (response.status === 200) {
-          let hospitals = this.state.hospitals;
+          let hospitals = { ...this.state.hospitals };
 
           hospitals = hospitals.filter(
             x => x.id !== this.state.tempHospital.id
@@ -242,7 +245,7 @@ class EditHospitalsPanel extends React.Component {
   };
 
   removeWard = index => {
-    let tempHospital = this.state.tempHospital;
+    let tempHospital = { ...this.state.tempHospital };
 
     if (tempHospital.wards.length <= 1) {
       this.setState({
@@ -260,7 +263,7 @@ class EditHospitalsPanel extends React.Component {
   };
 
   addWard = () => {
-    let tempHospital = this.state.tempHospital;
+    let tempHospital = { ...this.state.tempHospital };
 
     tempHospital.wards.push({
       type: store.wards.indexOf(tempHospital.ward),
