@@ -15,6 +15,7 @@ import {
 } from "reactstrap";
 
 import axios from "axios";
+import store from "../store";
 
 class EditUsersPanel extends React.Component {
   _isMounted = false;
@@ -223,15 +224,49 @@ class EditUsersPanel extends React.Component {
             return;
           }
 
-          let currentUsers = this.state.users;
-          let userIndex = currentUsers.findIndex(x => x.id === user.id);
-          currentUsers[userIndex].hospital = response.data[0];
-          this.setState({ users: currentUsers });
+          if (response.status === 200) {
+            let currentUsers = this.state.users;
+            let userIndex = currentUsers.findIndex(x => x.id === user.id);
+            currentUsers[userIndex].hospital = response.data[0];
+            this.setState({ users: currentUsers });
+          }
+
+          this.updateuserWard(user);
         })
         .catch(err => {
           console.log(err);
         });
     });
+  };
+
+  updateuserWard = user => {
+    axios
+      .get("Wards/" + user.hospital.id)
+      .then(response => {
+        if (!this._isMounted) {
+          return;
+        }
+
+        if (response.status === 200) {
+          let currentUsers = this.state.users;
+          let userIndex = currentUsers.findIndex(x => x.id === user.id);
+          currentUsers[userIndex].hospital.wards = response.data[0];
+          this.setState({ users: currentUsers });
+        }
+      })
+      .catch(() => {});
+  };
+
+  getWardForUser = user => {
+    if (user.hospital && user.hospital.wards) {
+      let ward = user.hospital.wards.find(x => x.id === user.wardId);
+
+      if (ward) {
+        return store.wards[ward.type];
+      }
+    }
+
+    return "";
   };
 
   render() {
@@ -248,6 +283,7 @@ class EditUsersPanel extends React.Component {
                 <th>Last Name</th>
                 <th>Email</th>
                 <th>Szpital</th>
+                <th>Oddział</th>
               </tr>
             </thead>
             <tbody>
@@ -263,6 +299,9 @@ class EditUsersPanel extends React.Component {
                     <th>{user.lastName}</th>
                     <th>{user.email}</th>
                     {user.hospital && <th>{user.hospital.name}</th>}
+                    {user.hospital && user.hospital.wards && (
+                      <th>{this.getWardForUser(user)}</th>
+                    )}
                   </tr>
                 );
               })}

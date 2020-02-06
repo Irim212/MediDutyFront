@@ -23,7 +23,7 @@ class UserPanelNavBar extends React.Component {
       this.props.history.push("/user-panel/calendar");
     }
 
-    if (store.auth.isAdministrator()) {
+    if (store.auth.isAdministrator() || store.auth.isHeadmaster()) {
       links.push({
         path: "/user-panel/add-user",
         content: "Dodaj użytkownika"
@@ -34,6 +34,10 @@ class UserPanelNavBar extends React.Component {
         content: "Edytuj użytkowników"
       });
 
+      this.props.history.push("/user-panel/add-user");
+    }
+
+    if (store.auth.isAdministrator()) {
       links.push({
         path: "/user-panel/add-hospital",
         content: "Dodaj szpital"
@@ -43,8 +47,6 @@ class UserPanelNavBar extends React.Component {
         path: "/user-panel/edit-hospitals",
         content: "Edytuj szpitale"
       });
-
-      this.props.history.push("/user-panel/add-user");
     }
 
     links.push({
