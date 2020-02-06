@@ -17,10 +17,13 @@ export default {
       axios.interceptors.response.use(
         response => response,
         error => {
-          console.log(error.response);
-          if (error.response.status === 401) {
-            this.logout();
+          if (error.response) {
+            console.log(error.response);
+            if (error.response.status === 401) {
+              this.logout();
+            }
           }
+
           return Promise.reject(error);
         }
       );
