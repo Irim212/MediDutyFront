@@ -47,11 +47,10 @@ class EditUsersPanel extends React.Component {
     axios
       .get("Roles")
       .then(response => {
+        if (!this._isMounted) {
+          return;
+        }
         if (response.status === 200) {
-          if (!this._isMounted) {
-            return;
-          }
-
           this.setState({
             roles: response.data,
             checkedRoles: response.data.map(() => true)
@@ -69,6 +68,8 @@ class EditUsersPanel extends React.Component {
 
         if (response.status === 200) {
           this.setState({ users: response.data });
+
+          this.updateUserHospitals();
         }
       })
       .catch(() => {});
@@ -211,6 +212,28 @@ class EditUsersPanel extends React.Component {
     this.setState({ infoModalOpened: !this.state.infoModalOpened });
   };
 
+  updateUserHospitals = () => {
+    let users = this.state.users;
+
+    users.forEach((user, index) => {
+      axios
+        .get("Hospitals/wardId/" + user.wardId)
+        .then(response => {
+          if (!this._isMounted) {
+            return;
+          }
+
+          let currentUsers = this.state.users;
+          let userIndex = currentUsers.findIndex(x => x.id === user.id);
+          currentUsers[userIndex].hospital = response.data[0];
+          this.setState({ users: currentUsers });
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    });
+  };
+
   render() {
     return (
       <div>
@@ -224,6 +247,7 @@ class EditUsersPanel extends React.Component {
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Email</th>
+                <th>Szpital</th>
               </tr>
             </thead>
             <tbody>
@@ -238,6 +262,7 @@ class EditUsersPanel extends React.Component {
                     <th>{user.firstName}</th>
                     <th>{user.lastName}</th>
                     <th>{user.email}</th>
+                    {user.hospital && <th>{user.hospital.name}</th>}
                   </tr>
                 );
               })}
