@@ -181,7 +181,7 @@ class EditUsersPanel extends React.Component {
       .then(response => {
         if (response.status === 200) {
           let users = this.state.users;
-          let index = users.indexOf(x => x.id === user.id);
+          let index = users.findIndex(x => x.id === user.id);
           users[index] = user;
           delete users[index]["password"];
 
