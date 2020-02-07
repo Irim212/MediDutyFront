@@ -123,8 +123,22 @@ class EditHospitalsPanel extends React.Component {
             .forEach(newWard => {
               axios
                 .post("Wards", newWard)
-                .then(response => console.log)
-                .catch(err => console.log);
+                .then(console.log)
+                .catch(console.log);
+            });
+
+          this.state.readonlyWards
+            .filter(
+              readonlyWard =>
+                this.state.tempHospital.wards.some(
+                  x => x.id === readonlyWard.id
+                ) === false
+            )
+            .forEach(wardToDelete => {
+              axios
+                .delete("Wards/" + wardToDelete.id)
+                .then(console.log)
+                .catch(console.log);
             });
 
           this.setState({
