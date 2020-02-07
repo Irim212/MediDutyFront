@@ -11,7 +11,8 @@ import {
   Input,
   Label,
   Form,
-  FormGroup
+  FormGroup,
+  FormText
 } from "reactstrap";
 
 import axios from "axios";
@@ -34,7 +35,8 @@ class EditUsersPanel extends React.Component {
         email: "",
         password: "",
         userRoles: [],
-        checkedRoles: []
+        checkedRoles: [],
+        wardId: -1
       },
       infoToggleModal: "",
       infoModalOpened: false,
@@ -103,10 +105,16 @@ class EditUsersPanel extends React.Component {
   };
 
   handleChange = (field, event) => {
-    let tempUser = this.state.tempUser;
+    let tempUser = { ...this.state.tempUser };
 
     if (["firstName", "lastName", "email", "password"].includes(field)) {
       tempUser[field] = event.target.value;
+    }
+
+    if (field === "ward") {
+      tempUser.wardId = tempUser.hospital.wards.find(
+        x => x.type === store.wards.indexOf(event.target.value)
+      ).id;
     }
 
     this.setState({ tempUser });
@@ -386,6 +394,38 @@ class EditUsersPanel extends React.Component {
                 </FormGroup>
               );
             })}
+
+            <FormGroup>
+              <Label>Szpital</Label>
+
+              {this.state.tempUser.hospital && (
+                <FormText color="muted">
+                  {this.state.tempUser.hospital.name}
+                </FormText>
+              )}
+            </FormGroup>
+
+            {this.state.tempUser.hospital && (
+              <FormGroup>
+                <Label>Oddział</Label>
+                <Input
+                  type="select"
+                  name="select"
+                  value={
+                    store.wards[
+                      this.state.tempUser.hospital.wards.find(
+                        x => x.id === this.state.tempUser.wardId
+                      ).type
+                    ]
+                  }
+                  onChange={e => this.handleChange("ward", e)}
+                >
+                  {this.state.tempUser.hospital.wards.map((item, i) => {
+                    return <option key={i}>{store.wards[item.type]}</option>;
+                  })}
+                </Input>
+              </FormGroup>
+            )}
           </Form>
         </ModalBody>
         <ModalFooter>
