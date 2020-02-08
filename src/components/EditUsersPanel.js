@@ -281,7 +281,7 @@ class EditUsersPanel extends React.Component {
     return (
       <div>
         {this.infoModal()}
-        {this.registerModal()}
+        {this.editModal()}
         <div className="edit-users">
           <Table size="sm" hover>
             <thead>
@@ -336,7 +336,7 @@ class EditUsersPanel extends React.Component {
     );
   };
 
-  registerModal = () => {
+  editModal = () => {
     return (
       <Modal isOpen={this.state.modalOpened}>
         <ModalHeader toggle={this.toggleModal}>Edytuj użytkownika</ModalHeader>
@@ -380,20 +380,21 @@ class EditUsersPanel extends React.Component {
                 onChange={e => this.handleChange("password", e)}
               />
             </FormGroup>
-            {this.state.roles.map((role, i) => {
-              return (
-                <FormGroup check key={i}>
-                  <Label check>
-                    <Input
-                      type="checkbox"
-                      checked={this.state.checkedRoles[i]}
-                      onChange={() => this.onRoleChange(i)}
-                    />
-                    {role.name}
-                  </Label>
-                </FormGroup>
-              );
-            })}
+            {store.auth.isAdministrator() &&
+              this.state.roles.map((role, i) => {
+                return (
+                  <FormGroup check key={i}>
+                    <Label check>
+                      <Input
+                        type="checkbox"
+                        checked={this.state.checkedRoles[i]}
+                        onChange={() => this.onRoleChange(i)}
+                      />
+                      {role.name}
+                    </Label>
+                  </FormGroup>
+                );
+              })}
 
             <FormGroup>
               <Label>Szpital</Label>
