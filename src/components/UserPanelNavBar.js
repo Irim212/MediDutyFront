@@ -33,8 +33,6 @@ class UserPanelNavBar extends React.Component {
         path: "/user-panel/edit-users",
         content: "Edytuj użytkowników"
       });
-
-      this.props.history.push("/user-panel/add-user");
     }
 
     if (store.auth.isAdministrator()) {
@@ -66,7 +64,7 @@ class UserPanelNavBar extends React.Component {
   render() {
     return (
       <div className="user-nav">
-        <Navbar color="light" light expand="md">
+        <Navbar light expand="md">
           <Nav className="mr-auto" navbar>
             {this.state.links.map((link, i) => {
               if (link.path !== undefined) {
