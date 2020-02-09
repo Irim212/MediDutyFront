@@ -21,9 +21,11 @@ import {
 } from "reactstrap";
 
 import store from "./../store";
+import moment from "moment";
 
 class UserCalendarPanel extends React.Component {
   _isMounted = false;
+  calendarComponentRef = React.createRef();
 
   constructor(props) {
     super(props);
@@ -36,7 +38,12 @@ class UserCalendarPanel extends React.Component {
       wardUsers: [],
       pickedUser: {
         id: -1
-      }
+      },
+      infoModal: false,
+      creatingEventState: 0,
+      startDate: null,
+      infoModalTitle: "",
+      infoModalDescription: ""
     };
   }
 
@@ -52,7 +59,7 @@ class UserCalendarPanel extends React.Component {
 
         if (response.status === 200) {
           this.setState({
-            events: response.data[0].map(item => {
+            events: response.data.map(item => {
               let newItem = {
                 id: item.id,
                 userId: item.userId,
@@ -86,7 +93,58 @@ class UserCalendarPanel extends React.Component {
   }
 
   dateClicked = args => {
-    console.log(args);
+    if (this.state.creatingEventState === 1) {
+      this.setState({ creatingEventState: 2, startDate: args });
+    } else if (this.state.creatingEventState === 2) {
+      this.setState({ creatingEventState: 0 });
+
+      if (moment(this.state.startDate.date).isSameOrBefore(args.date)) {
+        let newEvent = {
+          startsAt: moment(this.state.startDate.date)
+            .add(1, "days")
+            .toDate(),
+          endsAt: moment(args.date)
+            .add(1, "days")
+            .toDate(),
+          userId: this.state.pickedUser.id,
+          comment:
+            this.state.pickedUser.firstName +
+            " " +
+            this.state.pickedUser.lastName
+        };
+
+        axios
+          .post("Scheduler", newEvent)
+          .then(response => {
+            if (!this._isMounted) {
+              return;
+            }
+
+            if (response.status === 201) {
+              let newEvent = {
+                id: response.data.id,
+                userId: response.data.userId,
+                title: response.data.comment,
+                start: response.data.startsAt,
+                end: response.data.endsAt
+              };
+
+              let events = this.state.events;
+              events.push(newEvent);
+
+              this.setState({ events });
+            }
+          })
+          .catch(() => {});
+      } else {
+        this.setState({
+          infoModalTitle: "Nieprawidłowy przedział",
+          infoModalDescription:
+            "Data końca musi być później lub tego samego dnia co data początku. Rozpocznij od nowa."
+        });
+        this.toggleInfoModal();
+      }
+    }
   };
 
   selected = args => {
@@ -95,24 +153,30 @@ class UserCalendarPanel extends React.Component {
 
   render() {
     return (
-      <div className="calendar-container">
+      <div>
         {this.pickUserModal()}
+        {this.infoModal()}
         <div>
-          <Row>
-            <Col md={3}>
-              <Button color="primary" onClick={this.openPickUserModal}>
-                Dodaj dyżur
-              </Button>
-            </Col>
-          </Row>
+          <div className="calendar-container">
+            <div>
+              <Row>
+                <Col md={3}>
+                  <Button color="primary" onClick={this.openPickUserModal}>
+                    Dodaj dyżur
+                  </Button>
+                </Col>
+              </Row>
+            </div>
+            <FullCalendar
+              defaultView="dayGridMonth"
+              plugins={[dayGridPlugin, interactionPlugin]}
+              events={this.state.events}
+              dateClick={this.dateClicked}
+              select={this.selected}
+              allDay={true}
+            />
+          </div>
         </div>
-        <FullCalendar
-          defaultView="dayGridMonth"
-          plugins={[dayGridPlugin, interactionPlugin]}
-          events={this.state.events}
-          dateClick={this.dateClicked}
-          select={this.selected}
-        />
       </div>
     );
   }
@@ -132,8 +196,10 @@ class UserCalendarPanel extends React.Component {
         if (response.status === 200) {
           this.setState({
             wardUsers: response.data[0],
-            pickedUser: response.data[0][0]
+            pickedUser: response.data[0][0],
+            creatingEventState: 0
           });
+
           this.togglePickUserModal();
         }
       })
@@ -144,11 +210,22 @@ class UserCalendarPanel extends React.Component {
     this.setState({ pickUserModal: !this.state.pickUserModal });
   };
 
-  pickUser = () => {};
+  pickUser = () => {
+    this.setState({
+      creatingEventState: 1,
+      infoModalTitle: "Wybierz Okres",
+      infoModalDescription: "Wybierz datę początku i końca wydarzenia."
+    });
+    this.togglePickUserModal();
+    this.toggleInfoModal();
+  };
 
   handleChange = event => {
-    console.log(this.state.wardUsers[event.target.value]);
     this.setState({ pickedUser: this.state.wardUsers[event.target.value] });
+  };
+
+  selectIndex = () => {
+    return this.state.wardUsers.indexOf(this.state.pickedUser);
   };
 
   pickUserModal() {
@@ -166,7 +243,7 @@ class UserCalendarPanel extends React.Component {
                   <Input
                     type="select"
                     name="select"
-                    value={this.state.pickedUser}
+                    value={this.selectIndex()}
                     onChange={this.handleChange}
                   >
                     {this.state.wardUsers.map((item, i) => {
@@ -189,6 +266,26 @@ class UserCalendarPanel extends React.Component {
           <Button color="secondary" onClick={this.togglePickUserModal}>
             Anuluj
           </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  }
+
+  toggleInfoModal = () => {
+    this.setState({ infoModal: !this.state.infoModal });
+  };
+
+  infoModal() {
+    return (
+      <Modal isOpen={this.state.infoModal}>
+        <ModalHeader>{this.state.infoModalTitle}</ModalHeader>
+        <ModalBody>
+          <Label>{this.state.infoModalDescription}</Label>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="primary" onClick={this.toggleInfoModal}>
+            Kontynuuj
+          </Button>{" "}
         </ModalFooter>
       </Modal>
     );

@@ -19,8 +19,6 @@ class UserPanelNavBar extends React.Component {
         path: "/user-panel/calendar",
         content: "Dyżury"
       });
-
-      this.props.history.push("/user-panel/calendar");
     }
 
     if (store.auth.isAdministrator() || store.auth.isHeadmaster()) {
@@ -53,6 +51,12 @@ class UserPanelNavBar extends React.Component {
     });
 
     this.setState({ links });
+
+    if (!store.auth.isAdministrator()) {
+      this.props.history.push("/user-panel/calendar");
+    } else {
+      this.props.history.push("/user-panel/add-user");
+    }
   }
 
   logout = event => {
