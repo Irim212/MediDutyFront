@@ -25,7 +25,7 @@ import moment from "moment";
 
 class UserCalendarPanel extends React.Component {
   _isMounted = false;
-  calendarComponentRef = React.createRef();
+  calendarRef = React.createRef();
 
   constructor(props) {
     super(props);
@@ -65,7 +65,8 @@ class UserCalendarPanel extends React.Component {
                 userId: item.userId,
                 title: item.comment,
                 start: item.startsAt,
-                end: item.endsAt
+                end: item.endsAt,
+                allDay: false
               };
 
               return newItem;
@@ -121,16 +122,22 @@ class UserCalendarPanel extends React.Component {
             }
 
             if (response.status === 201) {
-              let newEvent = {
+              let calendarEvent = {
                 id: response.data.id,
                 userId: response.data.userId,
                 title: response.data.comment,
-                start: response.data.startsAt,
-                end: response.data.endsAt
+                start: response.data.startsAt.replace("Z", ""),
+                end: response.data.endsAt.replace("Z", ""),
+                allDay: false
               };
 
+              console.log(calendarEvent);
+
               let events = this.state.events;
-              events.push(newEvent);
+              events.push(calendarEvent);
+
+              this.calendarRef.current.getApi().addEvent(calendarEvent);
+              this.calendarRef.current.getApi().refetchEvents();
 
               this.setState({ events });
             }
@@ -168,12 +175,13 @@ class UserCalendarPanel extends React.Component {
               </Row>
             </div>
             <FullCalendar
+              ref={this.calendarRef}
               defaultView="dayGridMonth"
               plugins={[dayGridPlugin, interactionPlugin]}
               events={this.state.events}
               dateClick={this.dateClicked}
               select={this.selected}
-              allDay={true}
+              editable={true}
             />
           </div>
         </div>
