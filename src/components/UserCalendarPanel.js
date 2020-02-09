@@ -194,13 +194,26 @@ class UserCalendarPanel extends React.Component {
         }
 
         if (response.status === 200) {
-          this.setState({
-            wardUsers: response.data[0],
-            pickedUser: response.data[0][0],
-            creatingEventState: 0
-          });
+          if (store.auth.isHeadmaster()) {
+            this.setState({
+              wardUsers: response.data[0],
+              pickedUser: response.data[0][0],
+              creatingEventState: 0
+            });
 
-          this.togglePickUserModal();
+            this.togglePickUserModal();
+          } else {
+            this.setState({
+              wardUsers: response.data[0],
+              pickedUser: response.data[0].find(
+                x => x.id === parseInt(store.auth.user.primarysid)
+              ),
+              creatingEventState: 1,
+              infoModalTitle: "Wybierz Okres",
+              infoModalDescription: "Wybierz datę początku i końca wydarzenia."
+            });
+            this.toggleInfoModal();
+          }
         }
       })
       .catch(() => {});
