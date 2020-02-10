@@ -43,7 +43,9 @@ class UserCalendarPanel extends React.Component {
       creatingEventState: 0,
       startDate: null,
       infoModalTitle: "",
-      infoModalDescription: ""
+      infoModalDescription: "",
+      deleteModal: false,
+      eventToDelete: null
     };
   }
 
@@ -61,12 +63,12 @@ class UserCalendarPanel extends React.Component {
           this.setState({
             events: response.data.map(item => {
               let newItem = {
-                id: item.id,
                 userId: item.userId,
+                id: item.id,
                 title: item.comment,
                 start: item.startsAt,
                 end: item.endsAt,
-                allDay: false
+                allDay: true
               };
 
               return newItem;
@@ -101,12 +103,10 @@ class UserCalendarPanel extends React.Component {
 
       if (moment(this.state.startDate.date).isSameOrBefore(args.date)) {
         let newEvent = {
-          startsAt: moment(this.state.startDate.date)
-            .add(1, "days")
-            .toDate(),
+          startsAt: moment(this.state.startDate.date).format(),
           endsAt: moment(args.date)
             .add(1, "days")
-            .toDate(),
+            .format(),
           userId: this.state.pickedUser.id,
           comment:
             this.state.pickedUser.firstName +
@@ -123,15 +123,13 @@ class UserCalendarPanel extends React.Component {
 
             if (response.status === 201) {
               let calendarEvent = {
-                id: response.data.id,
                 userId: response.data.userId,
+                id: response.data.id,
                 title: response.data.comment,
-                start: response.data.startsAt.replace("Z", ""),
-                end: response.data.endsAt.replace("Z", ""),
-                allDay: false
+                start: moment(response.data.startsAt).format(),
+                end: moment(response.data.endsAt).format(),
+                allDay: true
               };
-
-              console.log(calendarEvent);
 
               let events = this.state.events;
               events.push(calendarEvent);
@@ -139,7 +137,13 @@ class UserCalendarPanel extends React.Component {
               this.calendarRef.current.getApi().addEvent(calendarEvent);
               this.calendarRef.current.getApi().refetchEvents();
 
-              this.setState({ events });
+              this.setState({
+                events,
+                infoModalTitle: "Dyzur zmieniony",
+                infoModalDescription: "Dyżur został zmieniony pomyślnie."
+              });
+
+              this.toggleInfoModal();
             }
           })
           .catch(() => {});
@@ -154,8 +158,57 @@ class UserCalendarPanel extends React.Component {
     }
   };
 
-  selected = args => {
-    console.log(args);
+  eventClick = args => {
+    this.setState({ eventToDelete: args.event });
+    console.log(args.event);
+    this.toggleDeleteModal();
+  };
+
+  eventChange = info => {
+    let event = this.state.events.find(
+      x => x.id === parseInt(info.event.id, 10)
+    );
+
+    if (!store.auth.isHeadmaster()) {
+      if (store.auth.primarysid !== event.userId) {
+        this.setState({
+          infoModalTitle: "Błąd",
+          infoModalDescription: "Nie możesz edytować nie swoich dyżurów."
+        });
+        this.toggleInfoModal();
+
+        info.revert();
+
+        return;
+      }
+    }
+
+    let newEvent = {
+      startsAt: moment(info.event.start).format(),
+      endsAt: moment(info.event.end).format(),
+      userId: event.userId,
+      id: parseInt(info.event.id, 10),
+      comment: info.event.title
+    };
+
+    axios
+      .put("Scheduler", newEvent)
+      .then(response => {
+        this.setState({
+          infoModalTitle: "Dyzur zmieniony",
+          infoModalDescription: "Dyżur został zmieniony pomyślnie."
+        });
+        this.toggleInfoModal();
+      })
+      .catch(err => {
+        this.setState({
+          infoModalTitle: "Zmiana nieudana",
+          infoModalDescription:
+            "Dyżur nie został zmieniony. Coś poszło nie tak."
+        });
+        this.toggleInfoModal();
+        info.revert();
+      });
   };
 
   render() {
@@ -163,6 +216,7 @@ class UserCalendarPanel extends React.Component {
       <div>
         {this.pickUserModal()}
         {this.infoModal()}
+        {this.deleteModal()}
         <div>
           <div className="calendar-container">
             <div>
@@ -180,8 +234,11 @@ class UserCalendarPanel extends React.Component {
               plugins={[dayGridPlugin, interactionPlugin]}
               events={this.state.events}
               dateClick={this.dateClicked}
-              select={this.selected}
+              eventClick={this.eventClick}
               editable={true}
+              eventResize={this.eventChange}
+              eventResizableFromStart={true}
+              eventDrop={this.eventChange}
             />
           </div>
         </div>
@@ -306,7 +363,64 @@ class UserCalendarPanel extends React.Component {
         <ModalFooter>
           <Button color="primary" onClick={this.toggleInfoModal}>
             Kontynuuj
-          </Button>{" "}
+          </Button>
+        </ModalFooter>
+      </Modal>
+    );
+  }
+
+  toggleDeleteModal = () => {
+    this.setState({ deleteModal: !this.state.deleteModal });
+  };
+
+  deleteEvent = () => {
+    axios
+      .delete("Scheduler/" + this.state.eventToDelete.id)
+      .then(response => {
+        let events = this.state.events;
+
+        events.slice(
+          events.findIndex(
+            event => event.id === parseInt(this.state.eventToDelete.id, 10)
+          )
+        );
+
+        this.state.eventToDelete.remove();
+        this.calendarRef.current.getApi().refetchEvents();
+
+        this.setState({
+          events,
+          infoModalTitle: "Usuwanie dyżuru",
+          infoModalDescription: "Dyżur został usunięty."
+        });
+        this.toggleDeleteModal();
+        this.toggleInfoModal();
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({
+          infoModalTitle: "Usuwanie dyżuru",
+          infoModalDescription: "Coś poszło nie tak."
+        });
+        this.toggleDeleteModal();
+        this.toggleInfoModal();
+      });
+  };
+
+  deleteModal() {
+    return (
+      <Modal isOpen={this.state.deleteModal}>
+        <ModalHeader>Usuwanie dyżuru</ModalHeader>
+        <ModalBody>
+          <Label>Czy chcesz usunąć wybrany dyżur?</Label>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="secondary" onClick={this.toggleDeleteModal}>
+            Anuluj
+          </Button>
+          <Button color="danger" onClick={this.deleteEvent}>
+            Usuń
+          </Button>
         </ModalFooter>
       </Modal>
     );
