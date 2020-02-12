@@ -8,7 +8,7 @@ import "bootstrap/dist/css/bootstrap.css";
 
 import axios from "axios";
 
-axios.defaults.baseURL = "http://127.0.0.1:5000/api/";
+axios.defaults.baseURL = "http://127.0.0.1:5001/api/";
 axios.defaults.headers.common["content-type"] = "application/json";
 
 ReactDOM.render(<App />, document.getElementById("root"));

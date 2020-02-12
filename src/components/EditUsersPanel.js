@@ -12,7 +12,10 @@ import {
   Label,
   Form,
   FormGroup,
-  FormText
+  FormText,
+  Pagination,
+  PaginationItem,
+  PaginationLink
 } from "reactstrap";
 
 import axios from "axios";
@@ -25,6 +28,12 @@ class EditUsersPanel extends React.Component {
     super(props);
 
     this.state = {
+      pagination: {
+        pageCount: 0,
+        pageNo: 0,
+        pageSize: 10,
+        totalRecordsCount: 0
+      },
       users: [],
       roles: [],
       modalOpened: false,
@@ -62,21 +71,42 @@ class EditUsersPanel extends React.Component {
       })
       .catch(() => {});
 
+    this.fetchUsersPage(1);
+  }
+
+  fetchUsersPage = pageNo => {
+    let config = {
+      headers: {
+        "Paging-PageNo": pageNo,
+        "Paging-PageSize": this.state.pagination.pageSize
+      }
+    };
+
     axios
-      .get("Users")
+      .get("Users", config)
       .then(response => {
         if (!this._isMounted) {
           return;
         }
 
         if (response.status === 200) {
-          this.setState({ users: response.data });
+          let pagination = {
+            pageCount: parseInt(response.headers["paging-pagecount"], 10),
+            pageNo: parseInt(response.headers["paging-pageno"], 10),
+            pageSize: parseInt(response.headers["paging-pagesize"], 10),
+            totalRecordsCount: parseInt(
+              response.headers["paging-totalrecordscount"],
+              10
+            )
+          };
+
+          this.setState({ users: response.data, pagination });
 
           this.updateUserHospitals();
         }
       })
       .catch(() => {});
-  }
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -295,30 +325,116 @@ class EditUsersPanel extends React.Component {
               </tr>
             </thead>
             <tbody>
-              {this.state.users.map((user, i) => {
-                return (
-                  <tr
-                    key={i}
-                    onClick={() => this.elementClicked(i)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <th scope="row">{i}</th>
-                    <th>{user.firstName}</th>
-                    <th>{user.lastName}</th>
-                    <th>{user.email}</th>
-                    {user.hospital && <th>{user.hospital.name}</th>}
-                    {user.hospital && user.hospital.wards && (
-                      <th>{this.getWardForUser(user)}</th>
-                    )}
-                  </tr>
-                );
-              })}
+              {this.state.pagination.pageCount > 0 &&
+                this.state.users.map((user, i) => {
+                  return (
+                    <tr
+                      key={i}
+                      onClick={() => this.elementClicked(i)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <th scope="row"></th>
+                      <th>{user.firstName}</th>
+                      <th>{user.lastName}</th>
+                      <th>{user.email}</th>
+                      {user.hospital && <th>{user.hospital.name}</th>}
+                      {user.hospital && user.hospital.wards && (
+                        <th>{this.getWardForUser(user)}</th>
+                      )}
+                    </tr>
+                  );
+                })}
             </tbody>
           </Table>
+          {this.pagination()}
         </div>
       </div>
     );
   }
+
+  pagination = () => {
+    let paginationItems = [];
+
+    for (
+      var i = this.state.pagination.pageNo - 3;
+      i < this.state.pagination.pageNo;
+      i++
+    ) {
+      if (i >= 1) {
+        paginationItems.push(i);
+      }
+    }
+
+    paginationItems.push(this.state.pagination.pageNo);
+
+    i = this.state.pagination.pageNo + 1;
+
+    for (
+      i = this.state.pagination.pageNo + 1;
+      i < this.state.pagination.pageNo + 4;
+      i++
+    ) {
+      if (i <= this.state.pagination.pageCount) {
+        paginationItems.push(i);
+      }
+    }
+
+    return (
+      <Pagination size="md">
+        <PaginationItem>
+          <PaginationLink
+            first
+            disabled={this.state.pagination.pageNo === 1}
+            onClick={() => this.fetchUsersPage(1)}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            previous
+            disabled={this.state.pagination.pageNo === 1}
+            onClick={() =>
+              this.fetchUsersPage(this.state.pagination.pageNo - 1)
+            }
+          />
+        </PaginationItem>
+        {paginationItems.map((item, index) => {
+          return (
+            <PaginationItem
+              key={index}
+              active={this.state.pagination.pageNo === item}
+            >
+              <PaginationLink
+                disabled={item === this.state.pagination.pageNo}
+                onClick={() => this.fetchUsersPage(item)}
+              >
+                {item}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        })}
+        <PaginationItem>
+          <PaginationLink
+            next
+            disabled={
+              this.state.pagination.pageNo === this.state.pagination.pageCount
+            }
+            onClick={() =>
+              this.fetchUsersPage(this.state.pagination.pageNo + 1)
+            }
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            last
+            disabled={
+              this.state.pagination.pageNo === this.state.pagination.pageCount
+            }
+            onClick={() => this.fetchUsersPage(this.state.pagination.pageCount)}
+          />
+        </PaginationItem>
+      </Pagination>
+    );
+  };
 
   infoModal = () => {
     return (
