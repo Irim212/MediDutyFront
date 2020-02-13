@@ -23,6 +23,7 @@ import store from "../store";
 
 class EditUsersPanel extends React.Component {
   _isMounted = false;
+  _searchTimeout = undefined;
 
   constructor(props) {
     super(props);
@@ -31,8 +32,12 @@ class EditUsersPanel extends React.Component {
       pagination: {
         pageCount: 0,
         pageNo: 0,
-        pageSize: 10,
+        pageSize: 1,
         totalRecordsCount: 0
+      },
+      search: {
+        phrase: "",
+        actualPhrase: ""
       },
       users: [],
       roles: [],
@@ -78,7 +83,8 @@ class EditUsersPanel extends React.Component {
     let config = {
       headers: {
         "Paging-PageNo": pageNo,
-        "Paging-PageSize": this.state.pagination.pageSize
+        "Paging-PageSize": this.state.pagination.pageSize,
+        "Search-Phrase": this.state.search.actualPhrase
       }
     };
 
@@ -307,12 +313,44 @@ class EditUsersPanel extends React.Component {
     return "";
   };
 
+  changeSearchPhrase = event => {
+    let search = {
+      phrase: event.target.value
+    };
+
+    this.setState({ search });
+
+    if (this._searchTimeout !== undefined) {
+      clearTimeout(this._searchTimeout);
+      this._searchTimeout = undefined;
+    }
+
+    this._searchTimeout = setTimeout(() => {
+      let search = this.state.search;
+      search.actualPhrase = search.phrase;
+
+      this.setState({ search });
+      this.fetchUsersPage(1);
+      this._searchTimeout = undefined;
+    }, 500);
+  };
+
   render() {
     return (
       <div>
         {this.infoModal()}
         {this.editModal()}
         <div className="edit-users">
+          <Form>
+            <FormGroup>
+              <Input
+                type="text"
+                placeholder="Wyszukaj użytkowników"
+                value={this.state.search.phrase}
+                onChange={e => this.changeSearchPhrase(e)}
+              ></Input>
+            </FormGroup>
+          </Form>
           <Table size="sm" hover>
             <thead>
               <tr>
@@ -355,28 +393,14 @@ class EditUsersPanel extends React.Component {
   pagination = () => {
     let paginationItems = [];
 
-    for (
-      var i = this.state.pagination.pageNo - 3;
-      i < this.state.pagination.pageNo;
-      i++
-    ) {
-      if (i >= 1) {
-        paginationItems.push(i);
-      }
-    }
+    let min = Math.max(this.state.pagination.pageNo - 3, 1);
+    let max = Math.min(
+      this.state.pagination.pageNo + 3,
+      this.state.pagination.pageCount
+    );
 
-    paginationItems.push(this.state.pagination.pageNo);
-
-    i = this.state.pagination.pageNo + 1;
-
-    for (
-      i = this.state.pagination.pageNo + 1;
-      i < this.state.pagination.pageNo + 4;
-      i++
-    ) {
-      if (i <= this.state.pagination.pageCount) {
-        paginationItems.push(i);
-      }
+    for (var i = min; i <= max; i++) {
+      paginationItems.push(i);
     }
 
     return (
@@ -384,14 +408,22 @@ class EditUsersPanel extends React.Component {
         <PaginationItem>
           <PaginationLink
             first
-            disabled={this.state.pagination.pageNo === 1}
+            disabled={
+              this.state.pagination.pageNo === 1 ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
+            }
             onClick={() => this.fetchUsersPage(1)}
           />
         </PaginationItem>
         <PaginationItem>
           <PaginationLink
             previous
-            disabled={this.state.pagination.pageNo === 1}
+            disabled={
+              this.state.pagination.pageNo === 1 ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
+            }
             onClick={() =>
               this.fetchUsersPage(this.state.pagination.pageNo - 1)
             }
@@ -404,7 +436,11 @@ class EditUsersPanel extends React.Component {
               active={this.state.pagination.pageNo === item}
             >
               <PaginationLink
-                disabled={item === this.state.pagination.pageNo}
+                disabled={
+                  item === this.state.pagination.pageNo ||
+                  this._searchTimeout !== undefined ||
+                  this.state.pagination.pageCount <= 0
+                }
                 onClick={() => this.fetchUsersPage(item)}
               >
                 {item}
@@ -416,7 +452,10 @@ class EditUsersPanel extends React.Component {
           <PaginationLink
             next
             disabled={
-              this.state.pagination.pageNo === this.state.pagination.pageCount
+              this.state.pagination.pageNo ===
+                this.state.pagination.pageCount ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
             }
             onClick={() =>
               this.fetchUsersPage(this.state.pagination.pageNo + 1)
@@ -427,7 +466,10 @@ class EditUsersPanel extends React.Component {
           <PaginationLink
             last
             disabled={
-              this.state.pagination.pageNo === this.state.pagination.pageCount
+              this.state.pagination.pageNo ===
+                this.state.pagination.pageCount ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
             }
             onClick={() => this.fetchUsersPage(this.state.pagination.pageCount)}
           />
