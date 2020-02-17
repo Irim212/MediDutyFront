@@ -40,18 +40,26 @@ export default {
       localStorage.removeItem("token");
     },
     isAdministrator() {
-      return (
-        this.user !== undefined &&
-        this.user !== null &&
-        this.user.role.indexOf("administrator") >= 0
-      );
+      if (this.user === null || this.user === undefined) {
+        return false;
+      }
+
+      if (typeof this.user.role === "string") {
+        return this.user.role.toLowerCase() === "administrator";
+      } else {
+        return this.user.role.some(x => x.toLowerCase() === "administrator");
+      }
     },
     isHeadmaster() {
-      return (
-        this.user !== undefined &&
-        this.user !== null &&
-        this.user.role.indexOf("headmaster") >= 0
-      );
+      if (this.user === null || this.user === undefined) {
+        return false;
+      }
+
+      if (typeof this.user.role === "string") {
+        return this.user.role.toLowerCase() === "headmaster";
+      } else {
+        return this.user.role.some(x => x.toLowerCase() === "headmaster");
+      }
     }
   },
   wards: [
