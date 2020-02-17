@@ -13,7 +13,10 @@ import {
   Form,
   FormGroup,
   Col,
-  Row
+  Row,
+  PaginationItem,
+  PaginationLink,
+  Pagination
 } from "reactstrap";
 
 import axios from "axios";
@@ -26,6 +29,16 @@ class EditHospitalsPanel extends React.Component {
     super(props);
 
     this.state = {
+      pagination: {
+        pageCount: 0,
+        pageNo: 0,
+        pageSize: 1,
+        totalRecordsCount: 0
+      },
+      search: {
+        phrase: "",
+        actualPhrase: ""
+      },
       hospitals: [],
       modalOpened: false,
       tempHospital: {
@@ -48,19 +61,40 @@ class EditHospitalsPanel extends React.Component {
   componentDidMount() {
     this._isMounted = true;
 
+    this.fetchHospitalsPage(1);
+  }
+
+  fetchHospitalsPage = pageNo => {
+    let config = {
+      headers: {
+        "Paging-PageNo": pageNo,
+        "Paging-PageSize": this.state.pagination.pageSize
+      }
+    };
+
     axios
-      .get("Hospitals")
+      .get("Hospitals/search/" + this.state.search.actualPhrase, config)
       .then(response => {
         if (response.status === 200) {
           if (!this._isMounted) {
             return;
           }
 
-          this.setState({ hospitals: response.data });
+          let pagination = {
+            pageCount: parseInt(response.headers["paging-pagecount"], 10),
+            pageNo: parseInt(response.headers["paging-pageno"], 10),
+            pageSize: parseInt(response.headers["paging-pagesize"], 10),
+            totalRecordsCount: parseInt(
+              response.headers["paging-totalrecordscount"],
+              10
+            )
+          };
+
+          this.setState({ hospitals: response.data, pagination });
         }
       })
       .catch(() => {});
-  }
+  };
 
   componentWillUnmount() {
     this._isMounted = false;
@@ -203,12 +237,44 @@ class EditHospitalsPanel extends React.Component {
     this.setState({ infoModalOpened: !this.state.infoModalOpened });
   };
 
+  changeSearchPhrase = event => {
+    let search = {
+      phrase: event.target.value
+    };
+
+    this.setState({ search });
+
+    if (this._searchTimeout !== undefined) {
+      clearTimeout(this._searchTimeout);
+      this._searchTimeout = undefined;
+    }
+
+    this._searchTimeout = setTimeout(() => {
+      let search = this.state.search;
+      search.actualPhrase = search.phrase;
+
+      this.setState({ search });
+      this.fetchHospitalsPage(1);
+      this._searchTimeout = undefined;
+    }, 500);
+  };
+
   render() {
     return (
       <div>
         {this.editHospitalModal()}
         {this.infoModal()}
         <div className="edit-hospitals">
+          <Form>
+            <FormGroup>
+              <Input
+                type="text"
+                placeholder="Wyszukaj szpitale"
+                value={this.state.search.phrase}
+                onChange={e => this.changeSearchPhrase(e)}
+              ></Input>
+            </FormGroup>
+          </Form>
           <Table size="sm" hover>
             <thead>
               <tr>
@@ -221,28 +287,120 @@ class EditHospitalsPanel extends React.Component {
               </tr>
             </thead>
             <tbody>
-              {this.state.hospitals.map((hospital, i) => {
-                return (
-                  <tr
-                    key={i}
-                    onClick={() => this.elementClicked(i)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <th scope="row">{i}</th>
-                    <th>{hospital.name}</th>
-                    <th>{hospital.street}</th>
-                    <th>{hospital.city}</th>
-                    <th>{hospital.zip}</th>
-                    <th>{hospital.district}</th>
-                  </tr>
-                );
-              })}
+              {this.state.pagination.pageCount > 0 &&
+                this.state.hospitals.map((hospital, i) => {
+                  return (
+                    <tr
+                      key={i}
+                      onClick={() => this.elementClicked(i)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <th scope="row"></th>
+                      <th>{hospital.name}</th>
+                      <th>{hospital.street}</th>
+                      <th>{hospital.city}</th>
+                      <th>{hospital.zip}</th>
+                      <th>{hospital.district}</th>
+                    </tr>
+                  );
+                })}
             </tbody>
           </Table>
+          {this.pagination()}
         </div>
       </div>
     );
   }
+
+  pagination = () => {
+    let paginationItems = [];
+
+    let min = Math.max(this.state.pagination.pageNo - 3, 1);
+    let max = Math.min(
+      this.state.pagination.pageNo + 3,
+      this.state.pagination.pageCount
+    );
+
+    for (var i = min; i <= max; i++) {
+      paginationItems.push(i);
+    }
+
+    return (
+      <Pagination size="md">
+        <PaginationItem>
+          <PaginationLink
+            first
+            disabled={
+              this.state.pagination.pageNo === 1 ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
+            }
+            onClick={() => this.fetchHospitalsPage(1)}
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            previous
+            disabled={
+              this.state.pagination.pageNo === 1 ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
+            }
+            onClick={() =>
+              this.fetchHospitalsPage(this.state.pagination.pageNo - 1)
+            }
+          />
+        </PaginationItem>
+        {paginationItems.map((item, index) => {
+          return (
+            <PaginationItem
+              key={index}
+              active={this.state.pagination.pageNo === item}
+            >
+              <PaginationLink
+                disabled={
+                  item === this.state.pagination.pageNo ||
+                  this._searchTimeout !== undefined ||
+                  this.state.pagination.pageCount <= 0
+                }
+                onClick={() => this.fetchHospitalsPage(item)}
+              >
+                {item}
+              </PaginationLink>
+            </PaginationItem>
+          );
+        })}
+        <PaginationItem>
+          <PaginationLink
+            next
+            disabled={
+              this.state.pagination.pageNo ===
+                this.state.pagination.pageCount ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
+            }
+            onClick={() =>
+              this.fetchHospitalsPage(this.state.pagination.pageNo + 1)
+            }
+          />
+        </PaginationItem>
+        <PaginationItem>
+          <PaginationLink
+            last
+            disabled={
+              this.state.pagination.pageNo ===
+                this.state.pagination.pageCount ||
+              this._searchTimeout !== undefined ||
+              this.state.pagination.pageCount <= 0
+            }
+            onClick={() =>
+              this.fetchHospitalsPage(this.state.pagination.pageCount)
+            }
+          />
+        </PaginationItem>
+      </Pagination>
+    );
+  };
 
   infoModal = () => {
     return (

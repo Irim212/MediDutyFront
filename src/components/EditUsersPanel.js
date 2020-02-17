@@ -83,13 +83,12 @@ class EditUsersPanel extends React.Component {
     let config = {
       headers: {
         "Paging-PageNo": pageNo,
-        "Paging-PageSize": this.state.pagination.pageSize,
-        "Search-Phrase": this.state.search.actualPhrase
+        "Paging-PageSize": this.state.pagination.pageSize
       }
     };
 
     axios
-      .get("Users", config)
+      .get("Users/search/" + this.state.search.actualPhrase, config)
       .then(response => {
         if (!this._isMounted) {
           return;
@@ -275,7 +274,7 @@ class EditUsersPanel extends React.Component {
             this.setState({ users: currentUsers });
           }
 
-          this.updateuserWard(user);
+          this.updateUserWard(user);
         })
         .catch(err => {
           console.log(err);
@@ -283,7 +282,7 @@ class EditUsersPanel extends React.Component {
     });
   };
 
-  updateuserWard = user => {
+  updateUserWard = user => {
     axios
       .get("Wards/" + user.hospital.id)
       .then(response => {
