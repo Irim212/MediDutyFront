@@ -60,8 +60,6 @@ class UserCalendarPanel extends React.Component {
         }
 
         if (response.status === 200) {
-          console.log(response.data);
-
           this.setState({
             events: response.data.map(item => {
               let newItem = {
@@ -172,9 +170,6 @@ class UserCalendarPanel extends React.Component {
     );
 
     if (!store.auth.isHeadmaster()) {
-      console.log(event);
-      console.log(store.auth);
-
       if (parseInt(store.auth.user.primarysid, 10) !== event.userId) {
         this.setState({
           infoModalTitle: "Błąd",
