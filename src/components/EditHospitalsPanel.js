@@ -216,6 +216,8 @@ class EditHospitalsPanel extends React.Component {
             modalInfoDescription:
               "Szpital " + this.state.tempHospital.name + " został usunięty."
           });
+
+          this.fetchHospitalsPage(1);
         }
 
         this.setState({ isLoading: false });

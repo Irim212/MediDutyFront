@@ -178,6 +178,8 @@ class EditUsersPanel extends React.Component {
             modalInfoDescription:
               "Użytkownik " + this.state.tempUser.email + " został usunięty."
           });
+
+          this.fetchUsersPage(1);
         }
 
         this.setState({ isLoading: false });
