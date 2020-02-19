@@ -205,7 +205,7 @@ class EditHospitalsPanel extends React.Component {
       .delete("Hospitals/" + this.state.tempHospital.id)
       .then(response => {
         if (response.status === 200) {
-          let hospitals = { ...this.state.hospitals };
+          let hospitals = this.state.hospitals;
 
           hospitals = hospitals.filter(
             x => x.id !== this.state.tempHospital.id
@@ -222,7 +222,8 @@ class EditHospitalsPanel extends React.Component {
         this.toggleModal();
         this.infoToggleModal();
       })
-      .catch(() => {
+      .catch(err => {
+        console.log(err);
         this.setState({
           isLoading: false,
           modalInfoDescription:
