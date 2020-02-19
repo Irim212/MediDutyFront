@@ -525,7 +525,7 @@ class EditHospitalsPanel extends React.Component {
               <Input
                 type="select"
                 name="select"
-                value={this.state.tempHospital.district}
+                value={this.state.tempHospital.district || ""}
                 onChange={e => this.handleChange("district", e)}
               >
                 {store.districts.map((item, i) => {
